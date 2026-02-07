@@ -1,0 +1,68 @@
+import multer from "multer";
+import multerS3 from "multer-s3";
+import path from "path";
+import dbConfig from "./db.config";
+import { s3 } from "./s3Bucket";
+
+const allowedMimeTypes = [
+  // PDF
+  "application/pdf",
+
+  // Excel
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+  // Images
+  "image/jpeg",
+  "image/png",
+  "image/jpg",
+  "image/webp",
+];
+
+const storage = multerS3({
+  s3,
+  bucket: dbConfig.aws.bucket_name as string,
+  acl: "public-read",
+  contentType: multerS3.AUTO_CONTENT_TYPE,
+
+  key: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    const cleanName = path
+      .basename(file.originalname, ext)
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+
+    const uniqueName = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2)}-${cleanName}${ext}`;
+
+    // 📂 Folder based on file type
+    let folder = "others";
+
+    if (file.mimetype === "application/pdf") folder = "pdf";
+    else if (file.mimetype.includes("spreadsheet")) folder = "excel";
+    else if (file.mimetype.startsWith("image/")) folder = "images";
+
+    cb(null, `${folder}/${uniqueName}`);
+  },
+});
+
+export const multerUpload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+
+    (req as any).fileValidationError =
+      "Invalid file type. Only PDF, Excel, and Image files are allowed.";
+  }
+},
+
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB
+  },
+});

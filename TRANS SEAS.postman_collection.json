@@ -1,0 +1,1004 @@
+{
+  "info": {
+    "_postman_id": "f28fbc1e-b801-4d2c-8b7f-667dd9a593b8",
+    "name": "TRANS SEAS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52095258",
+    "_collection_link": "https://go.postman.co/collection/52095258-f28fbc1e-b801-4d2c-8b7f-667dd9a593b8?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Sufian\",\r\n  \"email\": \"sufian9184@gmail.com\",\r\n  \"passwordHash\": \"123456\",\r\n  \"phone\": \"+971501234567\",\r\n  \"role\": \"ADMIN\",\r\n  \"isVerified\": false,\r\n  \"isActive\": true\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/user/create",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "user",
+                "create"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Create User",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Muhammad Ahmed\",\r\n  \"email\": \"muhammad@gmail.com\",\r\n  \"passwordHash\": \"123456\",\r\n  \"phone\": \"+971501234567\",\r\n  \"role\": \"ADMIN\",\r\n  \"isVerified\": false,\r\n  \"isActive\": true\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/user/create",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "user",
+                    "create"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:3000"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "438"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1b6-hKcPev31P8kpJB4DCMhb2iiKl6Y\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 05 Feb 2026 08:07:03 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"statusCode\": 201,\n    \"success\": true,\n    \"message\": \"User created successfully\",\n    \"data\": {\n        \"id\": \"095e3ce2-8a82-4bff-a43c-0c11377a42dc\",\n        \"name\": \"Muhammad Ahmed\",\n        \"email\": \"muhammad@gmail.com\",\n        \"passwordHash\": \"$2b$12$Ro5giVZhcetA7j4HqoDG7.wm029z9KcRC0ohJmufnDTCOyjJ1.yNG\",\n        \"phone\": \"+971501234567\",\n        \"role\": \"ADMIN\",\n        \"profileImage\": null,\n        \"otp\": null,\n        \"isVerified\": false,\n        \"isActive\": true,\n        \"createdAt\": \"2026-02-05T08:07:03.046Z\",\n        \"updatedAt\": \"2026-02-05T08:07:03.046Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/user/",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "user",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get All user",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Muhammad Ahmed\",\r\n  \"email\": \"muhammad@gmail.com\",\r\n  \"passwordHash\": \"123456\",\r\n  \"phone\": \"+971501234567\",\r\n  \"role\": \"ADMIN\",\r\n  \"isVerified\": false,\r\n  \"isActive\": true\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/user/095e3ce2-8a82-4bff-a43c-0c11377a42dc",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "user",
+                    "095e3ce2-8a82-4bff-a43c-0c11377a42dc"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:3000"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "790"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"316-X4p7MKXIm/heOiJMod7Sp1VHwbE\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 05 Feb 2026 08:08:27 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"statusCode\": 200,\n    \"success\": true,\n    \"message\": \"Users retrieved successfully\",\n    \"data\": [\n        {\n            \"id\": \"242b0c56-2c91-4374-ab3c-697105b8b12e\",\n            \"name\": \"Badol Asad\",\n            \"email\": \"admin@gmail.com\",\n            \"passwordHash\": \"$2b$10$3jvGhS1FHIpCBhCq2pobTuwwZdqVSsUJ8O8/k4Y/TUwLFgWYWuDhW\",\n            \"phone\": null,\n            \"role\": \"SUPER_ADMIN\",\n            \"profileImage\": null,\n            \"otp\": null,\n            \"isVerified\": true,\n            \"isActive\": true,\n            \"createdAt\": \"2026-02-04T08:40:44.485Z\",\n            \"updatedAt\": \"2026-02-04T08:40:44.485Z\"\n        },\n        {\n            \"id\": \"095e3ce2-8a82-4bff-a43c-0c11377a42dc\",\n            \"name\": \"Muhammad Ahmed\",\n            \"email\": \"muhammad@gmail.com\",\n            \"passwordHash\": \"$2b$12$Ro5giVZhcetA7j4HqoDG7.wm029z9KcRC0ohJmufnDTCOyjJ1.yNG\",\n            \"phone\": \"+971501234567\",\n            \"role\": \"ADMIN\",\n            \"profileImage\": null,\n            \"otp\": null,\n            \"isVerified\": false,\n            \"isActive\": true,\n            \"createdAt\": \"2026-02-05T08:07:03.046Z\",\n            \"updatedAt\": \"2026-02-05T08:07:03.046Z\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get User By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/user/095e3ce2-8a82-4bff-a43c-0c11377a42dc",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "user",
+                "095e3ce2-8a82-4bff-a43c-0c11377a42dc"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get User By Id",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Muhammad Ahmed\",\r\n  \"email\": \"muhammad@gmail.com\",\r\n  \"passwordHash\": \"123456\",\r\n  \"phone\": \"+971501234567\",\r\n  \"role\": \"ADMIN\",\r\n  \"isVerified\": false,\r\n  \"isActive\": true\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/user/095e3ce2-8a82-4bff-a43c-0c11377a42dc",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "user",
+                    "095e3ce2-8a82-4bff-a43c-0c11377a42dc"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:3000"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "440"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1b8-zaDj2ODsSv2zrJjHQEkGtTLrCfk\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 05 Feb 2026 08:10:57 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"statusCode\": 200,\n    \"success\": true,\n    \"message\": \"User retrieved successfully\",\n    \"data\": {\n        \"id\": \"095e3ce2-8a82-4bff-a43c-0c11377a42dc\",\n        \"name\": \"Muhammad Ahmed\",\n        \"email\": \"muhammad@gmail.com\",\n        \"passwordHash\": \"$2b$12$Ro5giVZhcetA7j4HqoDG7.wm029z9KcRC0ohJmufnDTCOyjJ1.yNG\",\n        \"phone\": \"+971501234567\",\n        \"role\": \"ADMIN\",\n        \"profileImage\": null,\n        \"otp\": null,\n        \"isVerified\": false,\n        \"isActive\": true,\n        \"createdAt\": \"2026-02-05T08:07:03.046Z\",\n        \"updatedAt\": \"2026-02-05T08:07:03.046Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update user",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/user/242b0c56-2c91-4374-ab3c-697105b8b12e",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "user",
+                "242b0c56-2c91-4374-ab3c-697105b8b12e"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Muhammad Kabir\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/user/095e3ce2-8a82-4bff-a43c-0c11377a42dc",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "user",
+                "095e3ce2-8a82-4bff-a43c-0c11377a42dc"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "// {\r\n//     \"email\": \"admin@gmail.com\",\r\n//     \"password\": \"123456\"\r\n// }\r\n{\r\n    \"email\": \"sufian9184@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/auth/login",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/auth/login",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:3000"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Set-Cookie",
+                  "value": "accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMjQyYjBjNTYtMmM5MS00Mzc0LWFiM2MtNjk3MTA1YjhiMTJlIiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiU1VQRVJfQURNSU4ifSwiaWF0IjoxNzcwMjgwMzM0LCJleHAiOjE3NzA3MTIzMzR9.Ec4F6USSNI69ZHRYw2AJxyRgfG5BB0PiV44aOwwsIeY; Max-Age=432000; Path=/; Expires=Tue, 10 Feb 2026 08:32:14 GMT; HttpOnly; SameSite=Lax"
+                },
+                {
+                  "key": "Set-Cookie",
+                  "value": "refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMjQyYjBjNTYtMmM5MS00Mzc0LWFiM2MtNjk3MTA1YjhiMTJlIiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiU1VQRVJfQURNSU4ifSwiaWF0IjoxNzcwMjgwMzM0LCJleHAiOjE3NzA4ODUxMzR9.UD70jRs2glFNx7OT-7ybRcrbG7SIl8ZfzLwkHrqFQ9g; Max-Age=604800; Path=/; Expires=Thu, 12 Feb 2026 08:32:14 GMT; HttpOnly; SameSite=Lax"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "988"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"3dc-EA508rcpyo5j8+F2E+zUeibivcU\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 05 Feb 2026 08:32:14 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"statusCode\": 200,\n    \"success\": true,\n    \"message\": \"User logged in successfully\",\n    \"data\": {\n        \"user\": {\n            \"id\": \"242b0c56-2c91-4374-ab3c-697105b8b12e\",\n            \"name\": \"Admin\",\n            \"email\": \"admin@gmail.com\",\n            \"passwordHash\": \"$2b$10$3jvGhS1FHIpCBhCq2pobTuwwZdqVSsUJ8O8/k4Y/TUwLFgWYWuDhW\",\n            \"phone\": null,\n            \"role\": \"SUPER_ADMIN\",\n            \"profileImage\": null,\n            \"otp\": null,\n            \"isVerified\": true,\n            \"isActive\": true,\n            \"createdAt\": \"2026-02-04T08:40:44.485Z\",\n            \"updatedAt\": \"2026-02-05T08:31:42.812Z\"\n        },\n        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMjQyYjBjNTYtMmM5MS00Mzc0LWFiM2MtNjk3MTA1YjhiMTJlIiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiU1VQRVJfQURNSU4ifSwiaWF0IjoxNzcwMjgwMzM0LCJleHAiOjE3NzA3MTIzMzR9.Ec4F6USSNI69ZHRYw2AJxyRgfG5BB0PiV44aOwwsIeY\",\n        \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMjQyYjBjNTYtMmM5MS00Mzc0LWFiM2MtNjk3MTA1YjhiMTJlIiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiU1VQRVJfQURNSU4ifSwiaWF0IjoxNzcwMjgwMzM0LCJleHAiOjE3NzA4ODUxMzR9.UD70jRs2glFNx7OT-7ybRcrbG7SIl8ZfzLwkHrqFQ9g\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Muhammad Ahmed\",\r\n  \"email\": \"muhammad@gmail.com\",\r\n  \"password\": \"SecurePass123!\",\r\n  \"phone\": \"+971501234567\",\r\n  \"role\": \"USER\",\r\n  \"isVerified\": false,\r\n  \"isActive\": true\r\n}\r\n"
+            },
+            "url": {
+              "raw": "{{url}}/auth/logout",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Logout",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Muhammad Ahmed\",\r\n  \"email\": \"muhammad@gmail.com\",\r\n  \"password\": \"SecurePass123!\",\r\n  \"phone\": \"+971501234567\",\r\n  \"role\": \"USER\",\r\n  \"isVerified\": false,\r\n  \"isActive\": true\r\n}\r\n"
+                },
+                "url": {
+                  "raw": "{{url}}/auth/logout",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "logout"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:3000"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Set-Cookie",
+                  "value": "accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+                },
+                {
+                  "key": "Set-Cookie",
+                  "value": "refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "86"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"56-XrRUdx0Ldp/3oL9MGEf2hr15COg\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 05 Feb 2026 06:56:13 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"statusCode\": 200,\n    \"success\": true,\n    \"message\": \"User logged out successfully\",\n    \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "get Me",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Muhammad Ahmed\",\r\n  \"email\": \"muhammad@gmail.com\",\r\n  \"password\": \"SecurePass123!\",\r\n  \"phone\": \"+971501234567\",\r\n  \"role\": \"USER\",\r\n  \"isVerified\": false,\r\n  \"isActive\": true\r\n}\r\n"
+            },
+            "url": {
+              "raw": "{{url}}/auth/me",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "get Me",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Muhammad Ahmed\",\r\n  \"email\": \"muhammad@gmail.com\",\r\n  \"password\": \"SecurePass123!\",\r\n  \"phone\": \"+971501234567\",\r\n  \"role\": \"USER\",\r\n  \"isVerified\": false,\r\n  \"isActive\": true\r\n}\r\n"
+                },
+                "url": {
+                  "raw": "{{url}}/auth/me",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:3000"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "184"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"b8-AtbrVgoOKrmKTXoe7dkJu6b39wY\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 05 Feb 2026 08:31:52 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"statusCode\": 200,\n    \"success\": true,\n    \"message\": \"User profile fetched successfully\",\n    \"data\": {\n        \"name\": \"Admin\",\n        \"email\": \"admin@gmail.com\",\n        \"role\": \"SUPER_ADMIN\",\n        \"isActive\": true,\n        \"isVerified\": true\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/auth/login",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"sufian9184@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/auth/forgot-password",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Otp",
+      "item": [
+        {
+          "name": "Send Otp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"sufian9184@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/otp/send",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "otp",
+                "send"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Send Otp",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"sufian9184@gmail.com\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/otp/send",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "otp",
+                    "send"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:3000"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "79"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"4f-6RRPGlheBnkabjhQkvVP5u2t73o\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 05 Feb 2026 09:44:08 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"statusCode\": 200,\n    \"success\": true,\n    \"message\": \"Otp sent successfully\",\n    \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Otp Verify",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"sufian9184@gmail.com\",\r\n    \"otp\": \"855426\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/otp/verify",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "otp",
+                "verify"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Otp Verify Successfully",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"sufian9184@gmail.com\",\r\n    \"otp\": \"855426\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/otp/verify",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "otp",
+                    "verify"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:3000"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "85"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"55-qxvElZ7nA+qZB6ucon1o/hx8k6Y\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 05 Feb 2026 10:07:22 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"statusCode\": 200,\n    \"success\": true,\n    \"message\": \"Email verified successfully\",\n    \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": ""
+    },
+    {
+      "value": ""
+    }
+  ]
+}

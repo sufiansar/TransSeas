@@ -1,0 +1,365 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String @unique
+  passwordHash String
+  phone        String?
+  role         UserRole @default(ADMIN)
+  profileImage String?
+  address      String?
+  country      String?
+  city         String?
+  otp          Int?
+  isVerified   Boolean @default(false)
+  isActive     Boolean @default(true)
+  userStatus   UserStatus @default(ACTIVE)
+  companyName  String?
+  category     String?
+  website      String?
+  orders       Order[]
+  projects     Project[]
+  rfqs         RFQ[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Project {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  vendorName    String?
+  vendorId        String? @db.ObjectId
+  vendor          User? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  referenceNo   String @unique
+  status        ProjectStatus @default(ACTIVE)
+  isActive      Boolean @default(true)
+  priceLevel    Float?
+  category       String?
+  currency      Currency? @default(USD)
+  country       String
+  location      String
+  documents     documents[]
+  manufacturerPackages ManufacturerPackage[]
+  rfqs          RFQ[]
+ 
+  // costSheets    CostSheet[]
+  // proposals     Proposal[]
+  // activities    ActivityLog[]
+  // assignedUsers ProjectUser[]
+  items         Items[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+@@index([vendorId, referenceNo])
+  @@map("projects")
+}
+
+
+
+model documents {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  fileName  String
+  fileType  String
+  fileUrl   String
+
+  projectId String  @db.ObjectId
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@map("documents")
+}
+
+model ManufacturerPackage {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  packageName String
+  description String?
+
+  projectId   String  @db.ObjectId
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([projectId])
+  @@map("manufacturerPackages")
+}
+ 
+model Items {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  itemTitle    String?
+  quantity     Int
+  menufacturer String?
+  itemcode     String
+  specifications  String?
+  price        Float?          
+  unit         Unit? @default(PIECE)
+  status       ItemsStatus @default(PENDING)
+  rfqId        String? @db.ObjectId
+  rfq          RFQ? @relation(fields: [rfqId], references: [id], onDelete: SetNull)
+  projectId    String @db.ObjectId
+  project      Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+@@index([projectId, rfqId])
+  @@map("items")          
+} 
+
+
+
+// model vendor {
+//   id        String @id @default(auto()) @map("_id") @db.ObjectId
+//   name      String?
+//   companyName      String
+//   email     String @unique
+//   phone     String?
+//   address   String?
+//   city      String?
+//   country   String?
+//   website   String?
+//   category  String?
+//   projects  Project[]
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("vendors")
+// }
+// model VendorQuote {
+//   id        String @id @default(auto()) @map("_id") @db.ObjectId
+//   rfqId     String @db.ObjectId
+//   rfq       RFQ @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+//   projectId String @db.ObjectId
+//   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   @@map("vendorQuotes")
+// }
+
+model RFQ {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+
+  projectId   String @db.ObjectId
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  vendorId    String? @db.ObjectId
+  vendor      User? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  itemIds     String[] @db.ObjectId
+  items       Items[]
+  dueDate    DateTime
+  emailSubject String?
+  emailMessage String?
+  followUpEmail String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+@@index([projectId, vendorId])
+  @@map("rfqs")
+}
+model Order {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId      String? @db.ObjectId
+  user        User? @relation(fields: [userId], references: [id])
+
+  status      OrderStatus @default(PENDING)
+  amount      Float
+  orderDate   DateTime @default(now())
+
+  shipment    Shipment?    @relation("OrderShipment")
+  payment     Payment?     @relation("OrderPayment")
+  transaction Transaction? @relation("OrderTransaction")
+  delivery    Delivery?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([userId])
+  @@map("orders")
+}
+
+
+
+
+model Shipment {
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
+  carrier        String
+  trackingNumber String
+  shippedDate    DateTime
+  deliveryDate   DateTime?
+  orderId        String @unique @db.ObjectId
+  order          Order @relation("OrderShipment", fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  @@map("shipments")
+}
+
+
+
+
+
+model Delivery {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+
+  orderId   String @unique @db.ObjectId
+  order     Order @relation(fields: [orderId], references: [id])
+
+  name      String?
+  email     String?
+  address   String
+  city      String
+  phone     String
+  postalCode String?
+  deliveryCharge Float?
+  status    DeliveryStatus @default(PROCESSING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("deliveries")
+}
+
+model Payment {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  method    String
+  amount    Float
+  userId    String?
+  orderId   String? @unique @db.ObjectId
+  order     Order? @relation("OrderPayment", fields: [orderId], references: [id], onDelete: SetNull)
+  status    PAYMENT_STATUS @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("payments")
+}
+
+model Transaction {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+
+  orderId   String @unique @db.ObjectId
+  order     Order @relation("OrderTransaction", fields: [orderId], references: [id], onDelete: Cascade)
+
+  status    String
+  transactionDate DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("transactions")
+}
+
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  PROCUREMENT_TEAM
+  VENDOR
+}
+
+
+enum ProjectStatus {
+  ACTIVE
+  INACTIVE
+  COMPLETED
+  ON_HOLD
+  CANCELED
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+  JPY
+  AUD
+  CAD
+  CHF
+  CNY
+  SEK
+  NZD
+  AED
+  SAR
+  QAR
+  KWD
+  OMR
+  BDT
+  PKR
+  INR
+
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+enum ItemsStatus {
+  PENDING
+  APPROVED
+  EIDITED
+  LOCKED
+}
+enum Unit {
+  PIECE        // pcs
+  SQUARE_METER // sqm
+  LINEAR_METER // lm
+  KILOGRAM     // kg
+  SET
+  LOT
+  CUBIC_METER  // m3
+  TONNE        // ton
+  ROLL
+  SHEET
+  BOX
+}
+
+
+enum PAYMENT_STATUS {
+  PENDING
+  PAID
+  CANCELED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+
+enum DeliveryStatus {
+  PROCESSING
+  ON_THE_WAY
+  DELIVERED
+  RETURNED
+  CANCELED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  REJECTED
+  DELIVERED
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
