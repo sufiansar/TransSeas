@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f6f8fb;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        background: #fff;
+        padding: 25px;
+        border-radius: 8px;
+      }
+      h2 {
+        color: #0a3cff;
+        margin-bottom: 10px;
+      }
+      .subject {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- ✅ Auto-generated subject shown in email (optional but professional) -->
+      <h2>Request For Quotation</h2>
+      <div class="subject"><strong>Subject:</strong> <%= emailSubject %></div>
+
+      <!-- ✅ Auto-generated RFQ Number -->
+      <!-- <p><strong>RFQ Number:</strong> <%= rfqNo %></p> -->
+
+      <!-- ✅ Company name -->
+      <!-- <p>Dear <strong><%= companyName %></strong>,</p> -->
+
+      <!-- ✅ Auto-generated body -->
+      <div style="line-height: 1.6; white-space: pre-line">
+        <%= emailBody %>
+      </div>
+
+      <!-- <p style="margin-top: 30px">
+        Kind regards,<br />
+        <strong>TransSeas Procurement Team</strong>
+      </p> -->
+    </div>
+  </body>
+</html>
