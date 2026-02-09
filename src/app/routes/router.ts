@@ -4,6 +4,8 @@ import { AuthRoute } from "../modules/auth/auth.route";
 import { OtpRouter } from "../modules/otp/otp.route";
 import { ProjectRoute } from "../modules/project/project.route";
 import { ItemsRoute } from "../modules/items/items.route";
+import { VendorRoute } from "../modules/vendor/vendor.route";
+import { RFQRoute } from "../modules/rfq/rfq.route";
 
 const router = express.Router();
 
@@ -11,6 +13,10 @@ const moduleRoutes = [
   {
     path: "/user",
     route: UserRoute,
+  },
+  {
+    path: "/vendor",
+    route: VendorRoute,
   },
   {
     path: "/otp",
@@ -27,6 +33,11 @@ const moduleRoutes = [
   {
     path: "/items",
     route: ItemsRoute,
+  },
+
+  {
+    path: "/rfq",
+    route: RFQRoute,
   },
 ];
 

@@ -16,7 +16,7 @@ const UserStatusEnum = z
 
 export const userUpdateSchema = z
   .object({
-    name: z.string().min(1, "Name is required").optional(),
+    name: z.string().min(1, "Name is required").nullable().optional(),
 
     email: z.string().email("Invalid email address").optional(),
 
@@ -63,7 +63,7 @@ export const userUpdateSchema = z
   .strict();
 
 export const userCreateSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Name is required").nullable().optional(),
 
   email: z.string().email("Invalid email address"),
 

@@ -21,20 +21,35 @@ export const mailQueue = new Queue("mail-queue", {
   },
 });
 
-
-
 // --------------------
 // Helper functions (optional but clean)
 // --------------------
 export const addForgotPasswordJob = (
   email: string,
   name: string,
-  resetUILink: string
+  resetUILink: string,
 ) => {
   return mailQueue.add("forgotPassword", {
     email,
     name,
     resetUILink,
+  });
+};
+export const addRFQMailJob = (
+  email: string,
+  companyName: string,
+  rfqNo: string,
+  emailSubject: string,
+  emailBody: string,
+  itemIds: string[],
+) => {
+  return mailQueue.add("sendRFQ", {
+    email,
+    companyName,
+    rfqNo,
+    emailSubject,
+    emailBody,
+    itemIds,
   });
 };
 
@@ -56,25 +71,24 @@ export const addUpdateTwoFactorJob = (userId: string, enabled: boolean) =>
 export const addResendTwoFactorOtpJob = (email: string) =>
   mailQueue.add("resendTwoFactorOTP", { email });
 
-
 const DAY = 24 * 60 * 60 * 1000;
 
 export const scheduleFollowUps = async (userId: string, email: string) => {
   await mailQueue.add(
     "followUpEmail",
     { userId, email, step: 1 },
-    { delay: 2 * DAY, jobId: `followup1:${userId}` }
+    { delay: 2 * DAY, jobId: `followup1:${userId}` },
   );
 
   await mailQueue.add(
     "followUpEmail",
     { userId, email, step: 2 },
-    { delay: 5 * DAY, jobId: `followup2:${userId}` }
+    { delay: 5 * DAY, jobId: `followup2:${userId}` },
   );
 
   await mailQueue.add(
     "followUpEmail",
     { userId, email, step: 3 },
-    { delay: 10 * DAY, jobId: `followup3:${userId}` }
+    { delay: 10 * DAY, jobId: `followup3:${userId}` },
   );
 };

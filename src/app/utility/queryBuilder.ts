@@ -165,23 +165,23 @@
 //     return this.prismaQuery;
 //   }
 
-//   async getMeta(model: any) {
-//     const page = Number(this.query.page) || 1;
-//     const limit = Number(this.query.limit) || 10;
+// async getMeta(model: any) {
+//   const page = Number(this.query.page) || 1;
+//   const limit = Number(this.query.limit) || 10;
 
-//     const total = await model.count({
-//       where: this.prismaQuery.where,
-//     });
+//   const total = await model.count({
+//     where: this.prismaQuery.where,
+//   });
 
-//     const totalPage = Math.ceil(total / limit);
+//   const totalPage = Math.ceil(total / limit);
 
-//     return {
-//       page,
-//       limit,
-//       total,
-//       totalPage,
-//     };
-//   }
+//   return {
+//     page,
+//     limit,
+//     total,
+//     totalPage,
+//   };
+// }
 // }
 
 import HttpStatus from "http-status";
@@ -343,7 +343,7 @@ export class PrismaQueryBuilder {
   // SORT
   // ------------------------
   sort(): this {
-    const sort = this.query.sort || "createdAt";
+    const sort = this.query.sort || "-createdAt";
 
     const orderBy = sort.split(",").map((field: string) => {
       if (field.startsWith("-")) {
@@ -397,6 +397,7 @@ export class PrismaQueryBuilder {
   // ------------------------
   // META DATA
   // ------------------------
+
   async getMeta(model: any) {
     const page = Number(this.query.page) || 1;
     const limit = Number(this.query.limit) || 10;
@@ -405,11 +406,13 @@ export class PrismaQueryBuilder {
       where: this.prismaQuery.where,
     });
 
+    const totalPage = Math.ceil(total / limit);
+
     return {
       page,
       limit,
       total,
-      totalPage: Math.ceil(total / limit),
+      totalPage,
     };
   }
 }

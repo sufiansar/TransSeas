@@ -16,11 +16,11 @@ datasource db {
 
 model User {
   id           String @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
+  name         String?
   email        String @unique
   passwordHash String
   phone        String?
-  role         UserRole @default(ADMIN)
+  role         UserRole @default(VENDOR)
   profileImage String?
   address      String?
   country      String?
@@ -32,9 +32,10 @@ model User {
   companyName  String?
   category     String?
   website      String?
+  rfqId        String? @db.ObjectId
+  rfq          RFQ? @relation(fields: [rfqId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   orders       Order[]
   projects     Project[]
-  rfqs         RFQ[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -126,43 +127,12 @@ model Items {
 } 
 
 
-
-// model vendor {
-//   id        String @id @default(auto()) @map("_id") @db.ObjectId
-//   name      String?
-//   companyName      String
-//   email     String @unique
-//   phone     String?
-//   address   String?
-//   city      String?
-//   country   String?
-//   website   String?
-//   category  String?
-//   projects  Project[]
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@map("vendors")
-// }
-// model VendorQuote {
-//   id        String @id @default(auto()) @map("_id") @db.ObjectId
-//   rfqId     String @db.ObjectId
-//   rfq       RFQ @relation(fields: [rfqId], references: [id], onDelete: Cascade)
-//   projectId String @db.ObjectId
-//   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   @@map("vendorQuotes")
-// }
-
 model RFQ {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
-
+  rfqNo       String @unique
   projectId   String @db.ObjectId
   project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  vendorId    String? @db.ObjectId
-  vendor      User? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
-  itemIds     String[] @db.ObjectId
+  vendors    User[]
   items       Items[]
   dueDate    DateTime
   emailSubject String?
@@ -170,9 +140,44 @@ model RFQ {
   followUpEmail String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-@@index([projectId, vendorId])
+@@index([projectId])
   @@map("rfqs")
 }
+
+model Quotation {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  rfqId     String @db.ObjectId
+  vendorEmail String
+
+  totalAmount Float
+  currency    String
+
+  items QuotationItem[]
+
+  sourceFile String
+}
+
+model QuotationItem {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  quotationId String @db.ObjectId
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  name        String
+  quantity    Int
+  unitPrice  Float
+  total      Float
+}
+
+
+
+
+
+
+
+
+
+
+
+
 model Order {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
 

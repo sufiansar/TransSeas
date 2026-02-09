@@ -10,51 +10,40 @@ import { th } from "zod/locales";
 import { deleteImageFromCLoudinary } from "../../config/clodinary.config";
 const createUser = async (userData: IUser, user: any) => {
   const existingUser = await prisma.user.findUnique({
-    where: {
-      email: userData.email,
-    },
+    where: { email: userData.email },
   });
 
   if (existingUser) {
     throw new AppError(HttpStatus.CONFLICT, "User already exists");
   }
 
-  if (user.role !== UserRole.SUPER_ADMIN) {
-    if (userData.role === UserRole.SUPER_ADMIN) {
-      throw new AppError(
-        HttpStatus.FORBIDDEN,
-        "Only SUPER_ADMIN can create another SUPER_ADMIN",
-      );
-    }
-  }
-
-  if (userData.role === UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
-    throw new AppError(
-      HttpStatus.FORBIDDEN,
-      "Only SUPER_ADMIN can create an ADMIN",
-    );
-  }
-
+  //  Vendor & Procurement Team cannot create users
   if (
-    userData.role === UserRole.PROCUREMENT_TEAM &&
+    user.role === UserRole.VENDOR ||
     user.role === UserRole.PROCUREMENT_TEAM
   ) {
     throw new AppError(
       HttpStatus.FORBIDDEN,
-      "PROCUREMENT_TEAM members cannot create another PROCUREMENT_TEAM member",
+      "You are not allowed to create users",
     );
   }
 
-  if (userData.role === UserRole.VENDOR && user.role === UserRole.VENDOR) {
+  //  Only SUPER_ADMIN can create SUPER_ADMIN
+  if (
+    userData.role === UserRole.SUPER_ADMIN &&
+    user.role !== UserRole.SUPER_ADMIN
+  ) {
     throw new AppError(
       HttpStatus.FORBIDDEN,
-      "VENDOR members cannot create another VENDOR member",
+      "Only SUPER_ADMIN can create another SUPER_ADMIN",
     );
   }
-  if (user.role === UserRole.VENDOR) {
+
+  //  Only SUPER_ADMIN can create ADMIN
+  if (userData.role === UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
     throw new AppError(
       HttpStatus.FORBIDDEN,
-      "VENDOR members cannot create users",
+      "Only SUPER_ADMIN can create an ADMIN",
     );
   }
 
@@ -65,11 +54,16 @@ const createUser = async (userData: IUser, user: any) => {
 
   const newUser = await prisma.user.create({
     data: {
-      name: userData.name,
+      name: userData.name || null,
+      companyName: userData.companyName || null,
       email: userData.email,
       passwordHash: hashedPassword,
       phone: userData.phone,
       role: userData.role,
+      address: userData.address || null,
+      country: userData.country || null,
+      city: userData.city || null,
+      profileImage: userData.profileImage || null,
       isVerified: userData.isVerified ?? false,
       isActive: userData.isActive ?? true,
     },
@@ -97,7 +91,7 @@ const getUserById = async (userId: string) => {
 };
 
 const getAllUsers = async (currentUser: any) => {
-  // 🚫 These roles see nobody
+  //These roles see nobody
   if (
     currentUser.role === UserRole.PROCUREMENT_TEAM ||
     currentUser.role === UserRole.VENDOR
@@ -108,12 +102,12 @@ const getAllUsers = async (currentUser: any) => {
     );
   }
 
-  // 👑 SUPER_ADMIN sees everyone
+  //SUPER_ADMIN sees everyone
   if (currentUser.role === UserRole.SUPER_ADMIN) {
     return prisma.user.findMany();
   }
 
-  // 🛠 ADMIN sees only vendor + procurement team
+  // ADMIN sees only vendor + procurement team
   if (currentUser.role === UserRole.ADMIN) {
     return prisma.user.findMany({
       where: {

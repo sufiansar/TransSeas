@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+
 import path from "path";
 
 dotenv.config({ path: path.join(process.cwd(), ".env") });
@@ -9,7 +10,12 @@ export default {
   database_url: process.env.DATABASE_URL,
   bcryptJs_salt: process.env.BCRYTPJS_SALT,
   frontEnd_url: process.env.FONTEND_URL,
-
+  ngrok_authtoken: process.env.NGROK_AUTHTOKEN,
+  google: {
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+  },
   superAdmin: {
     superAdmin_name: process.env.SUPERADMIN_NAME,
     superAdmin_email: process.env.SUPERADMIN_EMAIL,
