@@ -22,7 +22,7 @@ export const CreateProjectSchema = z.object({
     .optional()
     .default(0),
 
-  category: z.string().nullable().optional(),
+  categoryId: z.string().nullable().optional(),
 
   currency: z
     .nativeEnum(Currency, { message: "Invalid currency value" })
@@ -61,7 +61,7 @@ export const UpdateProjectSchema = z
       .nonnegative("Price level cannot be negative")
       .optional(),
 
-    category: z.string().nullable().optional(),
+    categoryId: z.string().nullable().optional(),
 
     currency: z
       .nativeEnum(Currency, { message: "Invalid currency value" })
