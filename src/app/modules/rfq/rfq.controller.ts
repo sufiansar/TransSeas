@@ -21,17 +21,24 @@ export const createRFQ = catchAsync(
 );
 
 const previewRFQEmail = async (req: Request, res: Response) => {
-  const { projectId, dueDate } = req.query;
+  const { projectId, dueDate, vendorIds } = req.query;
 
-  if (!projectId || !dueDate) {
-    return res.status(400).json({
-      message: "projectId and dueDate are required",
-    });
-  }
+  console.log("Received query params:", { projectId, dueDate, vendorIds });
+
+  // if (!projectId || !dueDate || !vendorIds) {
+  //   return res.status(400).json({
+  //     message: "projectId, dueDate and vendorIds are required",
+  //   });
+  // }
+
+  const selectedVendorIds = (vendorIds as string).split(",");
+
   const preview = await RFQService.previewRFQEmail(
     projectId as string,
     new Date(dueDate as string),
+    selectedVendorIds,
   );
+
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,

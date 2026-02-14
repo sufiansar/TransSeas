@@ -33,6 +33,7 @@ model User {
   categoryId   String? @db.ObjectId
   category     category? @relation(fields: [categoryId], references: [id])
   website      String?
+  degisnation   String?
   rfqId        String? @db.ObjectId
   rfq          RFQ? @relation(fields: [rfqId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   orders       Order[]
@@ -112,6 +113,7 @@ model Items {
   specifications String?
   quantity        Float                    
   unit            Unit @default(PIECE)
+  price           Float?
   targetPrice     Float?                    
   status          ItemsStatus @default(PENDING)
   rfqId           String? @db.ObjectId
@@ -193,24 +195,22 @@ model RFQ {
 
 model Quotation {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
-
   number        String   @unique   
-
   vendorEmail   String?
   subject       String?
-
   sourceFile    String?   
   fileType      FileType
-
   status        QuotationStatus @default(RECEIVED)
   items         QuotationItem[]
   vendorItemQuotes VendorItemQuote[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
- 
 
+  @@map("quotations")
 }
+
+
 
 model QuotationItem {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId

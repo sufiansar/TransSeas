@@ -10,3 +10,9 @@ export interface IRFQ {
   emailMessage?: string;
   followUpEmail?: string;
 }
+type RFQEmailPayload = {
+  rfqNo: string;
+  projectName: string;
+  dueDate: Date;
+  email: string[];
+};

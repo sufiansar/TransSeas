@@ -77,23 +77,48 @@ const createRFQDto = async (data: IRFQ) => {
   });
   return result;
 };
-export const previewRFQEmail = async (projectId: string, dueDate: Date) => {
+export const previewRFQEmail = async (
+  projectId: string,
+  dueDate: Date,
+  selectedVendorIds: string[],
+) => {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     select: { name: true },
   });
 
-  if (!project) {
-    throw new Error("Project not found");
+  if (!project) throw new Error("Project not found");
+
+  const vendors = await prisma.user.findMany({
+    where: {
+      id: { in: selectedVendorIds },
+      role: UserRole.VENDOR,
+      isActive: true,
+    },
+    select: { email: true },
+  });
+
+  if (!vendors.length) {
+    throw new Error("No selected vendors found");
   }
 
   const rfqNo = await generateRFQNumber(prisma);
 
-  return generateRFQEmail({
+  const vendorEmails = vendors.map((v) => v.email);
+
+  const emailPreview = await generateRFQEmail({
     rfqNo,
     dueDate,
     projectName: project.name,
   });
+
+  return {
+    rfqNo,
+    projectName: project.name,
+    dueDate,
+    vendorEmails,
+    emailPreview,
+  };
 };
 
 const getAllRFQs = async (query: any) => {
