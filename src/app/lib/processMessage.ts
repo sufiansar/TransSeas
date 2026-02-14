@@ -1,28 +1,30 @@
-// async function processMessage(messageId: string) {
-//   const message = await gmail.users.messages.get({
-//     userId: "me",
-//     id: messageId,
-//   });
+import { extractQuotationNumber, gmail, parseAndSave } from "./gmail.client";
 
-//   const subject = message.data.payload?.headers?.find(
-//     (h) => h.name === "Subject",
-//   )?.value;
+async function processMessage(messageId: string) {
+  const message = await gmail.users.messages.get({
+    userId: "me",
+    id: messageId,
+  });
 
-//   const quotationNumber = extractQuotationNumber(subject);
+  const subject = message.data.payload?.headers?.find(
+    (h) => h.name === "Subject",
+  )?.value;
 
-//   const parts = message.data.payload?.parts || [];
+  const quotationNumber = extractQuotationNumber(subject as any);
 
-//   for (const part of parts) {
-//     if (!part.filename) continue;
+  const parts = message.data.payload?.parts || [];
 
-//     const attachment = await gmail.users.messages.attachments.get({
-//       userId: "me",
-//       messageId,
-//       id: part.body!.attachmentId!,
-//     });
+  for (const part of parts) {
+    if (!part.filename) continue;
 
-//     const buffer = Buffer.from(attachment.data.data!, "base64");
+    const attachment = await gmail.users.messages.attachments.get({
+      userId: "me",
+      messageId,
+      id: part.body!.attachmentId!,
+    });
 
-//     await parseAndSave(buffer, part.filename, quotationNumber);
-//   }
-// }
+    const buffer = Buffer.from(attachment.data.data!, "base64");
+
+    await parseAndSave(buffer, part.filename, quotationNumber as any);
+  }
+}

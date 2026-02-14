@@ -64,6 +64,8 @@ const createUser = async (userData: IUser, user: any) => {
       country: userData.country || null,
       city: userData.city || null,
       profileImage: userData.profileImage || null,
+      categoryId: userData.categoryId || null,
+      website: userData.website || null,
       isVerified: userData.isVerified ?? false,
       isActive: userData.isActive ?? true,
     },

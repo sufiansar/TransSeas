@@ -41,7 +41,7 @@ export const createProject = async (payload: IProject, user: JwtPayload) => {
       vendorId: vendor.id,
       vendorName: vendor.name,
       priceLevel: payload.priceLevel || 0,
-      category: payload.category,
+      categoryId: payload.categoryId,
       currency: payload.currency || Currency.USD,
       country: payload.country,
       location: payload.location,
@@ -73,6 +73,12 @@ const getAllProjects = async (query: Record<string, any>) => {
             phone: true,
           },
         },
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     }),
     queryBuilder.getMeta(prisma.project),
@@ -87,6 +93,23 @@ const getAllProjects = async (query: Record<string, any>) => {
 const getProjectById = async (id: string) => {
   const project = await prisma.project.findUnique({
     where: { id },
+    include: {
+      items: true,
+      vendor: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+      category: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
   });
 
   if (!project) {

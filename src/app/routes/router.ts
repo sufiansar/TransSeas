@@ -6,6 +6,8 @@ import { ProjectRoute } from "../modules/project/project.route";
 import { ItemsRoute } from "../modules/items/items.route";
 import { VendorRoute } from "../modules/vendor/vendor.route";
 import { RFQRoute } from "../modules/rfq/rfq.route";
+import { CategoryRoute } from "../modules/category/category.route";
+import { CommodityRoute } from "../modules/commodity/commodity.route";
 
 const router = express.Router();
 
@@ -38,6 +40,14 @@ const moduleRoutes = [
   {
     path: "/rfq",
     route: RFQRoute,
+  },
+  {
+    path: "/category",
+    route: CategoryRoute,
+  },
+  {
+    path: "/commodity",
+    route: CommodityRoute,
   },
 ];
 

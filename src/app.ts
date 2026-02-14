@@ -5,6 +5,8 @@ import router from "./app/routes/router";
 import cookieParser from "cookie-parser";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
+import { fetchNewEmails } from "./app/lib/gmail.client";
+import { googleAuthRoutes } from "./app/utility/googleAuth/google.route";
 // import { PaymentController } from "./app/modules/payment/payment.controller";
 
 const app: Application = express();
@@ -13,6 +15,15 @@ const app: Application = express();
 //   express.raw({ type: "application/json" }),
 //   PaymentController.handleWebhook
 // );
+
+app.post("/gmail/webhook", async (req, res) => {
+  const historyId = req.body.historyId;
+
+  await fetchNewEmails(historyId);
+
+  res.sendStatus(200);
+});
+app.use(googleAuthRoutes);
 app.use(
   cors({
     origin: "http://localhost:3000",

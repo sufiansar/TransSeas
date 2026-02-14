@@ -16,7 +16,7 @@ export interface IUser {
   isActive?: boolean;
   userStatus?: UserStatus;
   companyName?: string | null;
-  category?: string | null;
+  categoryId?: string | null;
   website?: string | null;
 }
 
@@ -39,7 +39,7 @@ export interface IUserUpdate {
   userStatus?: UserStatus;
 
   companyName?: string | null;
-  category?: string | null;
+  categoryId?: string | null;
   website?: string | null;
   role?: UserRole;
 }

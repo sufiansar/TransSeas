@@ -13,7 +13,7 @@ export interface IProject {
   isActive?: boolean;
 
   priceLevel?: number | null;
-  category?: string | null;
+  categoryId?: string | null;
 
   currency?: Currency;
 
