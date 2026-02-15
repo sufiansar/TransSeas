@@ -1,7 +1,7 @@
 # ====== Stage 1: Build ======
 FROM node:24.13.1-alpine AS builder
 
-WORKDIR /usr
+WORKDIR /TransSeas
 
 COPY package*.json ./
 RUN npm install
@@ -12,16 +12,16 @@ RUN npm run build
 # ====== Stage 2: Production ======
 FROM node:24.13.1-alpine
 
-WORKDIR /usr
+WORKDIR /TransSeas
 
 COPY package*.json ./
 RUN npm install --only=production
 
 # Copy built JS
-COPY --from=builder /usr/dist ./dist
+COPY --from=builder /TransSeas/dist ./dist
 
 # Copy prisma folder (IMPORTANT)
-COPY --from=builder /usr/prisma ./prisma
+COPY --from=builder /TransSeas/prisma ./prisma
 
 # Generate prisma client HERE
 RUN npx prisma generate
