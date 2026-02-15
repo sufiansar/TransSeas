@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  api:
+    container_name: transseas-api
+    build: .
+    ports:
+      - "5333:5333"
+      - "465:465"
+      - "11802:11802"
+    env_file:
+      - .env
+    restart: unless-stopped
