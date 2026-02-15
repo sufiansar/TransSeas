@@ -1,11 +1,10 @@
+import { rfqStatus, UserRole } from "@prisma/client";
 import { addRFQMailJob } from "../../bullMQ/queues/mailQueues";
 import { prisma } from "../../config/prisma";
 import { generateRFQEmail, generateRFQNumber } from "../../lib/generateEmail";
 import { PrismaQueryBuilder } from "../../utility/queryBuilder";
 import { RfqFilterableFields, RfqSearchableFields } from "./rfq.constant";
 import { IRFQ } from "./rfq.interface";
-
-import { rfqStatus, UserRole } from "@prisma/client";
 
 const createRFQDto = async (data: IRFQ) => {
   if (!data.projectId) throw new Error("Project ID is required");

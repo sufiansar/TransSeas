@@ -275,8 +275,6 @@ export async function parseAndSave(
     items = parseExcel(buffer);
   }
 
-  validateItems(items);
-
   /* ======================
      SAVE IN DB
   ====================== */

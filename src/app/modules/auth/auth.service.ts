@@ -1,4 +1,3 @@
-// import { prisma } from "../../config/prisma";
 import bcrypt from "bcryptjs";
 import Jwt, { JwtPayload } from "jsonwebtoken";
 import dbConfig from "../../config/db.config";
@@ -7,6 +6,9 @@ import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status";
 import { addForgotPasswordJob } from "../../bullMQ/queues/mailQueues";
 import { prisma } from "../../config/prisma";
+import { UserRole } from "@prisma/client";
+import crypto from "crypto";
+import HttpStatus from "http-status";
 
 interface LoginPayload {
   email: string;
@@ -119,7 +121,8 @@ const forgotPassword = async (email: string) => {
 
   const result = await addForgotPasswordJob(
     isUserExit.email,
-    isUserExit.name,
+    isUserExit.name as string,
+
     resetUILink,
   );
   console.log("Forgot password job added to queue:", result);
@@ -140,10 +143,83 @@ const getme = async (userId: string) => {
   return user;
 };
 
+const createInvite = async (email: string, role: UserRole, user: any) => {
+  if (
+    user.role === UserRole.VENDOR ||
+    user.role === UserRole.PROCUREMENT_TEAM
+  ) {
+    throw new AppError(HttpStatus.FORBIDDEN, "Not allowed to invite users");
+  }
+
+  if (role === UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
+    throw new AppError(
+      HttpStatus.FORBIDDEN,
+      "Only SUPER_ADMIN can invite ADMIN",
+    );
+  }
+
+  const token = crypto.randomUUID();
+
+  const invite = await prisma.invite.create({
+    data: {
+      email,
+      role,
+      token,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    },
+  });
+
+  return {
+    invite,
+    link: `${dbConfig.frontEnd_url}/invite?token=${token}`,
+  };
+};
+
+const verifyInvite = async (token: string) => {
+  const invite = await prisma.invite.findUnique({ where: { token } });
+
+  if (!invite || invite.used) throw new AppError(400, "Invalid invite");
+
+  if (invite.expiresAt < new Date()) throw new AppError(400, "Invite expired");
+
+  return invite;
+};
+
+const acceptInvite = async (token: string, name: string, password: string) => {
+  const invite = await prisma.invite.findUnique({ where: { token } });
+
+  if (!invite || invite.used) throw new AppError(400, "Invalid invite");
+
+  if (invite.expiresAt < new Date()) throw new AppError(400, "Invite expired");
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email: invite.email,
+      passwordHash: hashedPassword,
+      role: invite.role,
+      isVerified: true,
+      isActive: true,
+    },
+  });
+
+  await prisma.invite.update({
+    where: { id: invite.id },
+    data: { used: true },
+  });
+
+  return user;
+};
+
 export const AuthService = {
   loginUser,
   changeUserPassword,
   resetPassword,
   forgotPassword,
+  createInvite,
+  verifyInvite,
   getme,
+  acceptInvite,
 };

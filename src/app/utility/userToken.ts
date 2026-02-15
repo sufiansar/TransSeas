@@ -1,13 +1,13 @@
-import { User } from "../../generated/prisma";
 import AppError from "../errorHelpers/AppError";
 import HttpStatus from "http-status";
 import { generateToken } from "./jwt";
 import dbConfig from "../config/db.config";
+import { User } from "@prisma/client";
 export const createUserToken = (user: Partial<User>) => {
   if (!user || !user.id || !user.email || !user.role) {
     throw new AppError(
       HttpStatus.BAD_REQUEST,
-      "User payload is missing required fields"
+      "User payload is missing required fields",
     );
   }
 
@@ -22,14 +22,14 @@ export const createUserToken = (user: Partial<User>) => {
   if (!dbConfig.jwt.accessToken_secret) {
     throw new AppError(
       HttpStatus.BAD_REQUEST,
-      "JWT access token secret is not configured"
+      "JWT access token secret is not configured",
     );
   }
 
   if (!dbConfig.jwt.refreshToken_secret) {
     throw new AppError(
       HttpStatus.BAD_REQUEST,
-      "JWT refresh token secret is not configured"
+      "JWT refresh token secret is not configured",
     );
   }
 
@@ -37,13 +37,13 @@ export const createUserToken = (user: Partial<User>) => {
   const accessToken = generateToken(
     jwtPayload,
     dbConfig.jwt.accessToken_secret,
-    dbConfig.jwt.accessToken_expiresIn as string
+    dbConfig.jwt.accessToken_expiresIn as string,
   );
 
   const refreshToken = generateToken(
     jwtPayload,
     dbConfig.jwt.refreshToken_secret,
-    dbConfig.jwt.refreshToken_expiresIn as string
+    dbConfig.jwt.refreshToken_expiresIn as string,
   );
 
   return {

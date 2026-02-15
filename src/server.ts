@@ -7,7 +7,7 @@ import app from "./app";
 import { seedSuperAdmin } from "./app/utility/seedSuperAdmin";
 import { connectRedis } from "./app/config/radis.config";
 import { prisma } from "./app/config/prisma";
-import { startGmailWatch } from "./app/lib/gmail.client";
+// import { startGmailWatch } from "./app/lib/gmail.client";
 // import ".src/app/bullMQ/workers/mailWorker";
 // import "./app/bullMQ/init";
 
@@ -27,7 +27,7 @@ async function startServer() {
   try {
     await connectDb();
     server = http.createServer(app);
-    await startGmailWatch();
+    // await startGmailWatch();
     server.listen(process.env.PORT, () => {
       console.log(
         `Database connected successfully.${process.env.DATABASE_URL}`,
@@ -44,7 +44,7 @@ async function startServer() {
 
 /**
  * Gracefully shutdown the server and close database connections.
- * @param {string} signal - The termination signal received.
+ * - The termination signal received.
  */
 async function gracefulShutdown(signal: string) {
   console.warn(`🔄 Received ${signal}, shutting down gracefully...`);
@@ -87,9 +87,8 @@ async function bootstrap() {
   await connectRedis(); // ✅ first
   await seedSuperAdmin(); // optional
 
-  await import("./app/bullMQ/init"); // ✅ AFTER Redis is ready
+  await import("./app/bullMQ/init");
 }
 
 bootstrap();
-// Start the application
 startServer();

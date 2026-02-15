@@ -46,6 +46,16 @@ model User {
   @@map("users")
 }
 
+model Invite {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  role      UserRole
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 model Project {
   id            String @id @default(auto()) @map("_id") @db.ObjectId
   name          String
