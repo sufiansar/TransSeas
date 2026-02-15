@@ -1,0 +1,37 @@
+name: CI/CD Pipeline for Transeas Backend
+
+on:
+  push:
+    branches:
+      - main # This triggers the workflow whenever code is merged/pushed to main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repo (just for reference, not needed on EC2)
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: SSH to Server and deploy
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST_IP }} # Server public IP
+          username: ${{ secrets.USER }} # Server username (usually ubuntu)
+          key: ${{ secrets.SSH_KEY }} # SSH private key (from GitHub secrets)
+          script: |
+            set -e
+
+            echo "🔹 Navigate to backend folder"
+            cd /var/www/Transseas
+
+            echo "🔹 Pull latest code"
+            git pull origin main
+
+            echo "🔹 docker compose build (Debugging)"
+            docker compose build
+
+            echo "🔹 docker compose up (Debugging)"
+            docker compose up
