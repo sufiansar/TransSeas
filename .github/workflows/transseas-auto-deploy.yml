@@ -35,4 +35,3 @@ jobs:
 
             echo "🔹 docker compose up (Debugging)"
             docker compose up -d --build
-
