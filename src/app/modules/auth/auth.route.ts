@@ -16,5 +16,5 @@ router.post(
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   AuthController.createInvite,
 );
-router.post("/accept-invite", AuthController.acceptInvite);
+router.post("/accept-invite/:token", AuthController.acceptInvite);
 export const AuthRoute = router;

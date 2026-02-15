@@ -52,6 +52,21 @@ export const addRFQMailJob = (
     itemIds,
   });
 };
+// --------------------
+// Invite user onboarding email
+// --------------------
+
+export const addInviteUserJob = (
+  email: string,
+  inviteLink: string,
+  role: string,
+) => {
+  return mailQueue.add("sendInviteUser", {
+    email,
+    inviteLink,
+    role,
+  });
+};
 
 export const addVerifyParentOtpJob = (email: string, otp: string) =>
   mailQueue.add("verifyParentOtp", { email, otp });
