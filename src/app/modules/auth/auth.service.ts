@@ -4,7 +4,10 @@ import dbConfig from "../../config/db.config";
 import { createUserToken } from "../../utility/userToken";
 import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status";
-import { addForgotPasswordJob } from "../../bullMQ/queues/mailQueues";
+import {
+  addForgotPasswordJob,
+  addInviteUserJob,
+} from "../../bullMQ/queues/mailQueues";
 import { prisma } from "../../config/prisma";
 import { UserRole } from "@prisma/client";
 import crypto from "crypto";
@@ -169,6 +172,12 @@ const createInvite = async (email: string, role: UserRole, user: any) => {
     },
   });
 
+  await addInviteUserJob(
+    email,
+    `${dbConfig.frontEnd_url}/invite?token=${token}`,
+    role,
+  );
+
   return {
     invite,
     link: `${dbConfig.frontEnd_url}/invite?token=${token}`,
@@ -192,7 +201,10 @@ const acceptInvite = async (token: string, name: string, password: string) => {
 
   if (invite.expiresAt < new Date()) throw new AppError(400, "Invite expired");
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(
+    password,
+    Number(dbConfig.bcryptJs_salt),
+  );
 
   const user = await prisma.user.create({
     data: {

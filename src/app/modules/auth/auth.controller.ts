@@ -161,9 +161,10 @@ const verifyInvite = catchAsync(async (req, res) => {
 });
 
 const acceptInvite = catchAsync(async (req, res) => {
-  const { token, name, password } = req.body;
+  const { token } = req.params;
+  const { name, password } = req.body;
 
-  const user = await AuthService.acceptInvite(token, name, password);
+  const user = await AuthService.acceptInvite(token as string, name, password);
 
   sendResponse(res, {
     statusCode: 201,

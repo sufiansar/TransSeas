@@ -13,7 +13,8 @@ import { generateRFQExcel } from "../../utility/generateRFQExcel";
 type MailJobData =
   | { email: string; otp: string } // verifyParentOtp
   | { email: string } // resendParentOtp, resendTwoFactorOTP
-  | { email: string; token: string }; // requestPasswordReset
+  | { email: string; token: string } // requestPasswordReset
+  | { email: string; inviteLink: string; role: string };
 
 /* -----------------------------
    Worker
@@ -39,7 +40,7 @@ export const mailWorker = new Worker(
             rfqNo: string;
             emailSubject: string;
             emailBody: string;
-            itemIds: string[]; // 👈 added
+            itemIds: string[];
           },
         );
         break;
@@ -53,6 +54,15 @@ export const mailWorker = new Worker(
             email: string;
             name: string;
             resetUILink: string;
+          },
+        );
+        break;
+      case "sendInviteUser":
+        await handleInviteUserEmail(
+          job.data as {
+            email: string;
+            inviteLink: string;
+            role: string;
           },
         );
         break;
@@ -87,6 +97,22 @@ async function handleForgotPassword(data: {
     templateData: {
       name: data.name,
       resetUILink: data.resetUILink,
+    },
+  });
+}
+
+async function handleInviteUserEmail(data: {
+  email: string;
+  inviteLink: string;
+  role: string;
+}) {
+  await sendEmail({
+    to: data.email,
+    subject: "You're invited to join TransSeas",
+    templateName: "invite-user",
+    templateData: {
+      inviteLink: data.inviteLink,
+      role: data.role,
     },
   });
 }
