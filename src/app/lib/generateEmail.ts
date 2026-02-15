@@ -103,18 +103,3 @@ export const generateQuotationNumber = async (tx: any, prefix = "PTC") => {
 
   return `${prefix}-Q-${year}-${sequence}`;
 };
-
-import axios from "axios";
-
-const token = await axios.post(
-  "https://oauth2.googleapis.com/token",
-  new URLSearchParams({
-    code: "YOUR_AUTH_CODE",
-    client_id: process.env.GOOGLE_CLIENT_ID!,
-    client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-    redirect_uri: "http://localhost:3000/auth/google/callback",
-    grant_type: "authorization_code",
-  }),
-);
-
-console.log(token.data);

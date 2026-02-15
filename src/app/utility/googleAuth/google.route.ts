@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { googleCallbackController } from "./google.controller";
-import { google } from "googleapis";
+// import { Router } from "express";
+// import { googleCallbackController } from "./google.controller";
+// import { google } from "googleapis";
 
-const router = Router();
+// const router = Router();
 
-router.get("/auth/google/callback", googleCallbackController);
+// router.get("/auth/google/callback", googleCallbackController);
 
-export const googleAuthRoutes = router;
+// export const googleAuthRoutes = router;

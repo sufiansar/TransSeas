@@ -7,7 +7,6 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "prisma:generate": "prisma generate --schema ./prisma",
-    "prisma:migrate": "prisma migrate dev --schema ./prisma",
     "start": "node dist/server.js"
   },
   "keywords": [],

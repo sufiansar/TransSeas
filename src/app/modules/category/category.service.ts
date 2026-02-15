@@ -65,7 +65,6 @@ export const getCategoryById = async (user: JwtPayload, categoryId: string) => {
   const category = await prisma.category.findUnique({
     where: { id: categoryId },
     include: {
-      rfq: { select: { id: true, title: true } },
       vendors: { select: { id: true, name: true, companyName: true } },
     },
   });
