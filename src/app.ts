@@ -40,7 +40,7 @@ app.use("/api/v1", router);
 
 app.get("/", (req: Request, res: Response) => {
   res.send({
-    message: "Server is running.. sufian",
+    message: "Server is running.. sufian ok",
     environment: process.env.NODE_ENV,
     uptime: process.uptime().toFixed(2) + " sec",
     timeStamp: new Date().toISOString(),
