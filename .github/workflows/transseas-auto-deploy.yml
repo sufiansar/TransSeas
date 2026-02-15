@@ -25,7 +25,7 @@ jobs:
             set -e
 
             echo "🔹 Navigate to backend folder"
-            cd /var/www/Transseas
+            cd /var/www/TransSeas
 
             echo "🔹 Pull latest code"
             git pull origin main
