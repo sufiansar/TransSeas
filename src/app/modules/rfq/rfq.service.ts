@@ -36,22 +36,21 @@ const createRFQDto = async (data: IRFQ) => {
     const { subject, body } = generateRFQEmail({
       rfqNo,
       dueDate: data.dueDate,
+      terms: data.terms,
       projectName: projectName?.name,
     });
-
     const emailSubject = data.emailSubject || subject;
     const emailMessage = data.emailMessage || body;
-
     const rfq = await tx.rFQ.create({
       data: {
         projectId: data.projectId,
         dueDate: data.dueDate,
         rfqNo,
         emailSubject,
+        terms: data.terms,
         emailMessage,
         followUpEmail: data.followUpEmail,
         rfqStatus: data.rfqStatus || rfqStatus.SENT,
-
         vendors: {
           connect: data.vendors.map((id) => ({ id })),
         },
@@ -68,6 +67,7 @@ const createRFQDto = async (data: IRFQ) => {
           rfqNo,
           emailSubject,
           emailMessage,
+          data.terms as string,
           data.items,
         ),
       ),
@@ -102,9 +102,7 @@ export const previewRFQEmail = async (
   }
 
   const rfqNo = await generateRFQNumber(prisma);
-
   const vendorEmails = vendors.map((v) => v.email);
-
   const emailPreview = await generateRFQEmail({
     rfqNo,
     dueDate,
@@ -232,6 +230,7 @@ const updateRFQ = async (rfqId: string, data: Partial<IRFQ>) => {
           vendor.companyName || vendor.name || "Valued Vendor",
           existingRFQ.rfqNo,
           emailSubject,
+          data.terms as string,
           emailMessage,
           data.items ?? [],
         ),

@@ -5,6 +5,7 @@ export interface IRFQ {
   vendors: string[];
   items: string[];
   dueDate: Date;
+  terms?: string;
   rfqStatus?: rfqStatus;
   emailSubject?: string;
   emailMessage?: string;

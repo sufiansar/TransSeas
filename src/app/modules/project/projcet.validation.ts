@@ -6,28 +6,32 @@ export const CreateProjectSchema = z.object({
 
   name: z.string().min(1, "Project name is required"),
 
-  referenceNo: z.string().min(1, "Reference number is required"),
+  // referenceNo: z.string().min(1, "Reference number is required"),
 
-  status: z.nativeEnum(ProjectStatus, {
-    message: "Invalid project status",
-  }),
-  vendorId: z.string().min(1, "Vendor ID is required"), // ✅ THIS
-  isActive: z.boolean().refine((v) => typeof v === "boolean", {
-    message: "Project active status is required",
-  }),
+  commodity: z.string().optional().nullable(),
 
-  priceLevel: z
-    .number({ message: "Price level must be a number" })
-    .nonnegative("Price level cannot be negative")
-    .optional()
-    .default(0),
+  clientName: z.string().optional().nullable(),
+
+  clientEmail: z.string().email("Invalid email address").optional(),
+  status: z
+    .nativeEnum(ProjectStatus, {
+      message: "Invalid project status",
+    })
+    .optional(),
+
+  isActive: z.boolean().optional().default(true),
+
+  totalPrice: z
+    .number({ message: "Total price must be a number" })
+    .nonnegative("Total price cannot be negative")
+    .optional(),
 
   categoryId: z.string().nullable().optional(),
 
   currency: z
     .nativeEnum(Currency, { message: "Invalid currency value" })
     .optional()
-    .default("USD"),
+    .default(Currency.USD),
 
   country: z.string().min(1, "Country is required"),
 
@@ -42,23 +46,19 @@ export const UpdateProjectSchema = z
 
     referenceNo: z.string().min(1, "Reference number is required").optional(),
 
+    commodity: z.string().optional().nullable(),
+
     status: z
       .nativeEnum(ProjectStatus, {
         message: "Invalid project status",
       })
       .optional(),
 
-    vendorId: z.string().min(1, "Vendor ID is required").optional(),
+    isActive: z.boolean().optional(),
 
-    isActive: z
-      .boolean({
-        message: "Project active status is required",
-      })
-      .optional(),
-
-    priceLevel: z
-      .number({ message: "Price level must be a number" })
-      .nonnegative("Price level cannot be negative")
+    totalPrice: z
+      .number({ message: "Total price must be a number" })
+      .nonnegative("Total price cannot be negative")
       .optional(),
 
     categoryId: z.string().nullable().optional(),
@@ -72,3 +72,31 @@ export const UpdateProjectSchema = z
     location: z.string().min(1, "Location is required").optional(),
   })
   .strict();
+
+export const generateProjectNumber = async (tx: any) => {
+  const year = new Date().getFullYear();
+
+  const lastProject = await tx.project.findFirst({
+    where: {
+      referenceNo: {
+        startsWith: `PRJ-P-${year}-`,
+      },
+    },
+    orderBy: {
+      referenceNo: "desc",
+    },
+    select: {
+      referenceNo: true,
+    },
+  });
+
+  let sequence = 1;
+
+  if (lastProject?.referenceNo) {
+    const lastSeq = Number(lastProject.referenceNo.split("-").pop());
+    sequence = lastSeq + 1;
+  }
+  console.log("LAST PROJECT:", lastProject?.referenceNo);
+
+  return `PRJ-P-${year}-${sequence}`;
+};

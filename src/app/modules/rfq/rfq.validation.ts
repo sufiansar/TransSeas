@@ -8,6 +8,10 @@ export const createRFQSchema = z.object({
   vendors: z.array(objectId).min(1, "At least one vendor is required"),
 
   items: z.array(objectId).min(1, "At least one item is required"),
+  terms: z
+    .string()
+    .min(10, "Terms should be at least 10 characters")
+    .optional(),
 
   dueDate: z.coerce.date().refine((d) => d > new Date(), {
     message: "Due date must be a future date",

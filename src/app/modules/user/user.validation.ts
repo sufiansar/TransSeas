@@ -72,7 +72,7 @@ export const userCreateSchema = z.object({
   phone: z.string().optional().nullable(),
 
   role: UserRoleEnum.optional(),
-
+  commonditiId: z.string().optional().nullable(),
   profileImage: z
     .string()
     .url("Profile image must be a valid URL")

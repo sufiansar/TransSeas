@@ -21,6 +21,10 @@ export const mailQueue = new Queue("mail-queue", {
   },
 });
 
+// mailQueue.on("waiting", (jobId) => {
+//   console.log("📥 Job waiting:", jobId);
+// });
+
 // --------------------
 // Helper functions (optional but clean)
 // --------------------
@@ -41,6 +45,7 @@ export const addRFQMailJob = (
   rfqNo: string,
   emailSubject: string,
   emailBody: string,
+  terms: string,
   itemIds: string[],
 ) => {
   return mailQueue.add("sendRFQ", {
@@ -49,6 +54,7 @@ export const addRFQMailJob = (
     rfqNo,
     emailSubject,
     emailBody,
+    terms,
     itemIds,
   });
 };

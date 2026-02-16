@@ -3,52 +3,39 @@ import AppError from "../../errorHelpers/AppError";
 import HttpStatus from "http-status";
 import { prisma } from "../../config/prisma";
 import { IProject } from "./project.interface";
-import { Currency, UserRole } from "@prisma/client";
+import { Currency, ProjectStatus, UserRole } from "@prisma/client";
 import { PrismaQueryBuilder } from "../../utility/queryBuilder";
 import { ProjectFilterableFields } from "./project.constant";
+import { generateProjectNumber } from "./projcet.validation";
+export const createProject = async (payload: any, user: JwtPayload) => {
+  if (!user) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
-export const createProject = async (payload: IProject, user: JwtPayload) => {
-  if (!user) {
-    throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
+    throw new AppError(HttpStatus.FORBIDDEN, "Permission denied");
   }
 
-  if (user.role !== UserRole.SUPER_ADMIN && user.role !== UserRole.ADMIN) {
-    throw new AppError(
-      HttpStatus.FORBIDDEN,
-      "Only ADMIN and SUPER_ADMIN can create projects",
-    );
-  }
+  const result = await prisma.$transaction(async (tx) => {
+    const projectNumber = await generateProjectNumber(tx);
 
-  // Validate vendor
-  if (!payload.vendorId) {
-    throw new AppError(HttpStatus.BAD_REQUEST, "Vendor ID is required");
-  }
+    const project = await tx.project.create({
+      data: {
+        referenceNo: projectNumber,
+        name: payload.name,
+        clientName: payload.clientName,
+        clientEmail: payload.clientEmail,
+        commodity: payload.commodity || null,
+        status: payload.status || ProjectStatus.ACTIVE,
+        isActive: payload.isActive ?? true,
+        currency: payload.currency || Currency.USD,
+        country: payload.country,
+        location: payload.location,
+      },
+    });
 
-  const vendor = await prisma.user.findUnique({
-    where: { id: payload.vendorId },
+    return project;
   });
 
-  if (!vendor || vendor.role !== UserRole.VENDOR) {
-    throw new AppError(HttpStatus.BAD_REQUEST, "Selected vendor is invalid");
-  }
-
-  const newProject = await prisma.project.create({
-    data: {
-      name: payload.name,
-      referenceNo: payload.referenceNo,
-      status: payload.status,
-      isActive: payload.isActive,
-      vendorId: vendor.id,
-      vendorName: vendor.name,
-      priceLevel: payload.priceLevel || 0,
-      categoryId: payload.categoryId,
-      currency: payload.currency || Currency.USD,
-      country: payload.country,
-      location: payload.location,
-    },
-  });
-
-  return newProject;
+  return result;
 };
 
 const getAllProjects = async (query: Record<string, any>) => {
@@ -138,28 +125,25 @@ const updateProject = async (
   const existingProject = await prisma.project.findUnique({
     where: { id },
   });
+
   if (!existingProject) {
     throw new AppError(HttpStatus.NOT_FOUND, "Project not found");
-  }
-
-  //  Validate vendor if vendorId is being updated
-  if (payload.vendorId && payload.vendorId !== existingProject.vendorId) {
-    const vendor = await prisma.user.findUnique({
-      where: { id: payload.vendorId },
-    });
-    if (!vendor || vendor.role !== UserRole.VENDOR) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Selected vendor is invalid");
-    }
   }
 
   const updatedProject = await prisma.project.update({
     where: { id },
     data: {
-      ...payload,
-      vendorName: payload.vendorId
-        ? (await prisma.user.findUnique({ where: { id: payload.vendorId } }))
-            ?.name
-        : existingProject.vendorName,
+      name: payload.projectName ?? existingProject.name,
+      referenceNo: payload.referenceNo ?? existingProject.referenceNo,
+      clientName: payload.clientName ?? existingProject.clientName,
+      clientEmail: payload.clientEmail ?? existingProject.clientEmail,
+      status: payload.status ?? existingProject.status,
+      isActive: payload.isActive ?? existingProject.isActive,
+      totalPrice: payload.totalPrice ?? existingProject.totalPrice,
+      categoryId: payload.categoryId ?? existingProject.categoryId,
+      currency: payload.currency ?? existingProject.currency,
+      country: payload.country ?? existingProject.country,
+      location: payload.location ?? existingProject.location,
     },
   });
 
