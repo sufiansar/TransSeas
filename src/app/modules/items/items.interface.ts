@@ -3,7 +3,7 @@ import { ItemsStatus, Unit } from "@prisma/client";
 export interface CreateItemDTO {
   itemTitle?: string;
   quantity: number;
-  menufacturer?: string;
+  manufacturer?: string;
   itemcode: string;
   specifications?: string;
   price?: number;
@@ -11,4 +11,5 @@ export interface CreateItemDTO {
   status?: ItemsStatus;
   rfqId?: string | null;
   projectId: string;
+  commonditiId?: string | null;
 }

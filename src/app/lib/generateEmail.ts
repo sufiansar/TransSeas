@@ -10,7 +10,44 @@ interface RFQEmailPayload {
   dueDate: Date;
   email?: string[];
   projectName?: string;
+  terms?: string;
 }
+
+// export const generateRFQEmail = ({
+//   rfqNo,
+//   companyName,
+//   email,
+//   dueDate,
+//   projectName,
+//   terms,
+// }: RFQEmailPayload) => {
+//   const formattedDate = dueDate.toLocaleDateString("en-GB", {
+//     day: "2-digit",
+//     month: "short",
+//     year: "numeric",
+//   });
+
+//   const subject = `${rfqNo} – Request for Quotation${projectName ? ` | ${projectName}` : ""}`;
+
+//   const body = `
+// Dear ${companyName || "Valued Vendor"},
+
+// TransSeas is pleased to invite your company to submit a quotation for the following Request for Quotation (RFQ):
+
+// RFQ Number: ${rfqNo}
+// Project: ${projectName || "N/A"}
+// Submission Deadline: ${formattedDate}
+
+// Please review the RFQ details in the portal and submit your best pricing, delivery timeline, and terms.
+
+// If you require any clarification, feel free to contact our procurement team.
+
+// Kind regards,
+// TransSeas Procurement Team
+// `;
+
+//   return { subject, body };
+// };
 
 export const generateRFQEmail = ({
   rfqNo,
@@ -18,6 +55,7 @@ export const generateRFQEmail = ({
   email,
   dueDate,
   projectName,
+  terms,
 }: RFQEmailPayload) => {
   const formattedDate = dueDate.toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -25,7 +63,19 @@ export const generateRFQEmail = ({
     year: "numeric",
   });
 
-  const subject = `RFQ ${rfqNo} – Request for Quotation${projectName ? ` | ${projectName}` : ""}`;
+  const subject = `${rfqNo} – Request for Quotation${
+    projectName ? ` | ${projectName}` : ""
+  }`;
+
+  const termsBlock = terms
+    ? `
+------------------------------
+TERMS & CONDITIONS
+------------------------------
+${terms}
+
+`
+    : "";
 
   const body = `
 Dear ${companyName || "Valued Vendor"},
@@ -36,11 +86,12 @@ RFQ Number: ${rfqNo}
 Project: ${projectName || "N/A"}
 Submission Deadline: ${formattedDate}
 
-Please review the RFQ details in the portal and submit your best pricing, delivery timeline, and terms.
+${termsBlock}
+Please review the RFQ details in the portal and submit your best pricing and delivery timeline accordingly.
 
 If you require any clarification, feel free to contact our procurement team.
 
-Kind regards,  
+Kind regards,
 TransSeas Procurement Team
 `;
 

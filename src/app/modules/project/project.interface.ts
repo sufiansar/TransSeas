@@ -3,16 +3,16 @@ import { Currency, ProjectStatus } from "@prisma/client";
 export interface IProject {
   id?: string;
 
-  name: string;
+  projectName: string;
   referenceNo: string;
 
-  vendorId?: string | null;
-  vendorName?: string | null;
+  clientEmail?: string;
+  clientName?: string;
 
   status?: ProjectStatus;
   isActive?: boolean;
 
-  priceLevel?: number | null;
+  totalPrice?: number | null;
   categoryId?: string | null;
 
   currency?: Currency;

@@ -25,12 +25,11 @@ export const createItem = async (payload: CreateItemDTO) => {
   }
 
   return prisma.$transaction(async (tx) => {
-    //  Create item
     const item = await tx.items.create({
       data: {
         itemTitle: payload.itemTitle,
         quantity: payload.quantity,
-        menufacturer: payload.menufacturer,
+        manufacturer: payload.manufacturer,
         itemcode: payload.itemcode,
         specifications: payload.specifications,
         price: payload.price,
@@ -38,6 +37,7 @@ export const createItem = async (payload: CreateItemDTO) => {
         status: payload.status,
         rfqId: payload.rfqId,
         projectId: payload.projectId,
+        commonditiId: payload.commonditiId,
       },
     });
 
@@ -55,30 +55,50 @@ export const createItem = async (payload: CreateItemDTO) => {
       0,
     );
 
-    // Update project total
     await tx.project.update({
       where: { id: payload.projectId },
-      data: { priceLevel: totalPrice },
+      data: { totalPrice: totalPrice },
     });
 
     return item;
   });
 };
 
+// const getAllItems = async (query: Record<string, any>, user: JwtPayload) => {
+//   const queryBuilder = new PrismaQueryBuilder(query);
+//   const itemsQuery = queryBuilder
+//     .filter(ItemsFilterableFields)
+//     .search(ItemsSearchableFields)
+//     .fields()
+//     .sort()
+//     .paginate();
+//   const [data, meta] = await Promise.all([
+//     prisma.items.findMany({
+//       ...itemsQuery.build(),
+//       include: {
+//         commodity: { select: { name: true } },
+//         project: { select: { name: true } },
+//       },
+//     }),
+//     queryBuilder.getMeta(prisma.items),
+//   ]);
+//   if (!user) {
+//     throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+//   }
+
+//   if (user.role !== UserRole.SUPER_ADMIN && user.role !== UserRole.ADMIN) {
+//     throw new AppError(
+//       HttpStatus.FORBIDDEN,
+//       "Only ADMIN and SUPER_ADMIN can access items",
+//     );
+//   }
+//   return {
+//     data,
+//     meta,
+//   };
+// };
+
 const getAllItems = async (query: Record<string, any>, user: JwtPayload) => {
-  const queryBuilder = new PrismaQueryBuilder(query);
-  const itemsQuery = queryBuilder
-    .filter(ItemsFilterableFields)
-    .search(ItemsSearchableFields)
-    .fields()
-    .sort()
-    .paginate();
-  const [data, meta] = await Promise.all([
-    prisma.items.findMany({
-      ...itemsQuery.build(),
-    }),
-    queryBuilder.getMeta(prisma.items),
-  ]);
   if (!user) {
     throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
   }
@@ -89,6 +109,77 @@ const getAllItems = async (query: Record<string, any>, user: JwtPayload) => {
       "Only ADMIN and SUPER_ADMIN can access items",
     );
   }
+
+  const queryBuilder = new PrismaQueryBuilder(query);
+
+  const builtQuery = queryBuilder
+    .filter(ItemsFilterableFields) // scalar fields only
+    .search(ItemsSearchableFields)
+    .fields()
+    .sort()
+    .paginate()
+    .build();
+
+  const andConditions: any[] = [];
+
+  // keep scalar filters from builder
+  if (builtQuery.where) {
+    andConditions.push(builtQuery.where);
+  }
+
+  //  filter by commodityId (foreign key)
+  if (query.commodityId) {
+    andConditions.push({
+      commodityId: query.commodityId,
+    });
+  }
+
+  // filter by projectId
+  if (query.projectId) {
+    andConditions.push({
+      projectId: query.projectId,
+    });
+  }
+
+  // filter by commodity name (relation)
+  if (query.commodity) {
+    andConditions.push({
+      commodity: {
+        name: {
+          contains: query.commodity,
+          mode: "insensitive",
+        },
+      },
+    });
+  }
+
+  // filter by project name (relation)
+  if (query.project) {
+    andConditions.push({
+      project: {
+        name: {
+          contains: query.project,
+          mode: "insensitive",
+        },
+      },
+    });
+  }
+
+  builtQuery.where = {
+    AND: andConditions,
+  };
+
+  const [data, meta] = await Promise.all([
+    prisma.items.findMany({
+      ...builtQuery,
+      include: {
+        commodity: { select: { name: true } },
+        project: { select: { name: true } },
+      },
+    }),
+    queryBuilder.getMeta(prisma.items),
+  ]);
+
   return {
     data,
     meta,

@@ -14,6 +14,16 @@ type MailJobData =
   | { email: string; otp: string } // verifyParentOtp
   | { email: string } // resendParentOtp, resendTwoFactorOTP
   | { email: string; token: string } // requestPasswordReset
+  | { email: string; name: string; resetUILink: string } // forgotPassword
+  | {
+      email: string;
+      companyName: string;
+      rfqNo: string;
+      emailSubject: string;
+      emailBody: string;
+      terms: string;
+      itemIds: string[];
+    } // sendRFQ
   | { email: string; inviteLink: string; role: string };
 
 /* -----------------------------
@@ -40,6 +50,7 @@ export const mailWorker = new Worker(
             rfqNo: string;
             emailSubject: string;
             emailBody: string;
+            terms: string;
             itemIds: string[];
           },
         );

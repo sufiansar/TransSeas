@@ -13,6 +13,7 @@ export interface IUser {
   otp?: number | null;
   city?: string | null;
   isVerified?: boolean;
+  commonditiId?: string | null;
   isActive?: boolean;
   userStatus?: UserStatus;
   companyName?: string | null;

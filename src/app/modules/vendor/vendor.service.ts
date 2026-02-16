@@ -6,6 +6,39 @@ import {
   VendorSearchableFields,
 } from "./vendor.constant";
 
+// const getAllVendors = async (query: any) => {
+//   const prismaQuery = new PrismaQueryBuilder(query);
+
+//   const builtQuery = prismaQuery
+//     .filter(VendorFilterableFields)
+//     .search(VendorSearchableFields)
+//     .fields()
+//     .sort()
+//     .paginate()
+//     .build();
+
+//   builtQuery.where = {
+//     AND: [builtQuery.where || {}, { role: UserRole.VENDOR }],
+//   };
+
+//   const [data, meta] = await Promise.all([
+//     prisma.user.findMany({
+//       ...builtQuery,
+//       include: {
+//         commodity: {
+//           select: { name: true },
+//         },
+//         category: {
+//           select: { name: true },
+//         },
+//       },
+//     }),
+//     prismaQuery.getMeta(prisma.user),
+//   ]);
+
+//   return { data, meta };
+// };
+
 const getAllVendors = async (query: any) => {
   const prismaQuery = new PrismaQueryBuilder(query);
 
@@ -17,13 +50,49 @@ const getAllVendors = async (query: any) => {
     .paginate()
     .build();
 
+  const andConditions: any[] = [];
+
+  if (builtQuery.where) {
+    andConditions.push(builtQuery.where);
+  }
+
+  andConditions.push({
+    role: UserRole.VENDOR,
+  });
+
+  if (query.commodity) {
+    andConditions.push({
+      commodity: {
+        name: {
+          contains: query.commodity,
+          mode: "insensitive",
+        },
+      },
+    });
+  }
+
+  if (query.category) {
+    andConditions.push({
+      category: {
+        name: {
+          contains: query.category,
+          mode: "insensitive",
+        },
+      },
+    });
+  }
+
   builtQuery.where = {
-    AND: [builtQuery.where || {}, { role: UserRole.VENDOR }],
+    AND: andConditions,
   };
 
   const [data, meta] = await Promise.all([
     prisma.user.findMany({
       ...builtQuery,
+      include: {
+        commodity: { select: { name: true } },
+        category: { select: { name: true } },
+      },
     }),
     prismaQuery.getMeta(prisma.user),
   ]);

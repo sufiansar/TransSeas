@@ -10,6 +10,7 @@ import HttpStatus from "http-status";
 export const createRFQ = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
+    console.log("Creating RFQ with data:", payload);
     const result = await RFQService.createRFQDto(payload);
     sendResponse(res, {
       statusCode: HttpStatus.CREATED,

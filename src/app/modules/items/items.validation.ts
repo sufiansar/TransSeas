@@ -10,10 +10,12 @@ export const CreateItemsSchema = z
       .int("Quantity must be an integer")
       .positive("Quantity must be greater than 0"),
 
-    menufacturer: z
+    manufacturer: z
       .string()
       .min(1, "Manufacturer name cannot be empty")
       .optional(),
+
+    commonditiId: z.string().optional().nullable(),
 
     itemcode: z.string().min(1, "Item code is required"),
 
@@ -55,10 +57,12 @@ export const UpdateItemsSchema = z
       .positive("Quantity must be greater than 0")
       .optional(),
 
-    menufacturer: z
+    manufacturer: z
       .string()
       .min(1, "Manufacturer name cannot be empty")
       .optional(),
+
+    commonditiId: z.string().optional().nullable(),
 
     itemcode: z.string().min(1, "Item code cannot be empty").optional(),
 

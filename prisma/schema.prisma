@@ -59,22 +59,24 @@ model Invite {
 model Project {
   id            String @id @default(auto()) @map("_id") @db.ObjectId
   name          String
-  vendorName    String?
+  clientName    String?
+  clientEmail    String?
   vendorId        String? @db.ObjectId
   vendor          User? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
   referenceNo   String @unique
   commodity      String?
   status        ProjectStatus @default(ACTIVE)
   isActive      Boolean @default(true)
-  priceLevel    Float?
+  totalPrice    Float?
   categoryId       String? @db.ObjectId
   category         category? @relation(fields: [categoryId], references: [id])
   currency      Currency? @default(USD)
-  country       String
+  country       String?
   location      String
   documents     documents[]
   manufacturerPackages ManufacturerPackage[]
   rfqs          RFQ[]
+  quotations     Quotation[]
   // costSheets    CostSheet[]
   // proposals     Proposal[]
   // activities    ActivityLog[]
@@ -119,7 +121,7 @@ model Items {
   id              String @id @default(auto()) @map("_id") @db.ObjectId
   itemTitle       String?
   itemcode        String
-  menufacturer    String?
+  manufacturer    String?
   specifications String?
   quantity        Float                    
   unit            Unit @default(PIECE)
@@ -130,7 +132,10 @@ model Items {
   rfq             RFQ? @relation(fields: [rfqId], references: [id], onDelete: SetNull)
   projectId       String @db.ObjectId
   project         Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  vendorQuotes    VendorItemQuote[]         
+  commonditiId String? @db.ObjectId
+  commodity    commodity? @relation(fields: [commonditiId], references: [id])
+  // vendorQuotes    VendorItemQuote[] 
+          
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -138,28 +143,28 @@ model Items {
   @@map("items")
 }
 
-model VendorItemQuote {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+// model VendorItemQuote {
+//   id        String @id @default(auto()) @map("_id") @db.ObjectId
 
-  itemId   String @db.ObjectId
-  item     Items @relation(fields: [itemId], references: [id], onDelete: Cascade)
+//   itemId   String @db.ObjectId
+//   item     Items @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
-  quotationId String @db.ObjectId
-  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+//   quotationId String @db.ObjectId
+//   quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
 
-  vendorEmail String
+//   vendorEmail String
 
-  price   Float  
-  total   Float
+//   price   Float  
+//   total   Float
 
-  leadTimeDays Int?
-  remarks String?
+//   leadTimeDays Int?
+//   remarks String?
 
-  createdAt DateTime @default(now())
+//   createdAt DateTime @default(now())
 
-  @@index([itemId])
-  @@index([quotationId])
-}
+//   @@index([itemId])
+//   @@index([quotationId])
+// }
 
 
 model category {
@@ -176,6 +181,7 @@ model commodity {
   name      String @unique
   rfq       RFQ[]
   vendors   User[]
+  items     Items[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("commodities")
@@ -189,12 +195,14 @@ model RFQ {
   project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   vendors    User[]
   items       Items[]
+  terms       String?
   dueDate    DateTime
   emailSubject String?
   rfqStatus   rfqStatus @default(SENT)
   commodityId    String? @db.ObjectId
   commodity      commodity? @relation(fields: [commodityId], references: [id])
-
+  quatationId    String? @db.ObjectId
+  quotation     Quotation? @relation(fields: [quatationId], references: [id], onDelete: SetNull)
   emailMessage String?
   followUpEmail String?
   createdAt   DateTime @default(now())
@@ -206,13 +214,17 @@ model RFQ {
 model Quotation {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   number        String   @unique   
-  vendorEmail   String?
+  vendorid   String?
+  
   subject       String?
   sourceFile    String?   
-  fileType      FileType
-  status        QuotationStatus @default(RECEIVED)
-  items         QuotationItem[]
-  vendorItemQuotes VendorItemQuote[]
+  fileType      FileType?
+  status        QuotationStatus @default(PARSED)
+  rfq           RFQ[]
+  projectId     String   @db.ObjectId
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  // items         Items[]
+  // vendorItemQuotes VendorItemQuote[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -222,19 +234,19 @@ model Quotation {
 
 
 
-model QuotationItem {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+// model QuotationItem {
+//   id           String   @id @default(auto()) @map("_id") @db.ObjectId
 
-  quotationId String   @db.ObjectId
-  quotation   Quotation @relation(fields: [quotationId], references: [id])
+//   quotationId String   @db.ObjectId
+//   quotation   Quotation @relation(fields: [quotationId], references: [id])
 
-  name        String
-  quantity    Int
-  price       Float
-  total       Float
+//   name        String
+//   quantity    Int
+//   price       Float
+//   total       Float
 
-  createdAt   DateTime @default(now())
-}
+//   createdAt   DateTime @default(now())
+// }
 
 
 
@@ -254,10 +266,10 @@ enum FileType {
 }
 
 enum QuotationStatus {
+ NEEDS_REVIEW
   RECEIVED
-  PROCESSING
-  COMPLETED
-  ERROR
+  APPROVED
+ PARSED
 }
 
 
@@ -358,6 +370,7 @@ enum UserRole {
   ADMIN
   PROCUREMENT_TEAM
   VENDOR
+  CLIENT
 }
 
 
