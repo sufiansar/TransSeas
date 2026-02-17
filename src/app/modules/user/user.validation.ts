@@ -26,13 +26,14 @@ export const userUpdateSchema = z
       .optional(),
 
     phone: z.string().optional().nullable(),
+    additionalPhone: z.string().optional().nullable(),
 
     profileImage: z
       .string()
       .url("Profile image must be a valid URL")
       .optional()
       .nullable(),
-
+    designation: z.string().optional().nullable(),
     address: z.string().optional().nullable(),
     country: z.string().optional().nullable(),
     city: z.string().optional().nullable(),
@@ -52,6 +53,10 @@ export const userUpdateSchema = z
     companyName: z.string().optional().nullable(),
     category: z.string().optional().nullable(),
 
+    commodities: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .transform((val) => (val ? (Array.isArray(val) ? val : [val]) : [])),
     website: z
       .string()
       .url("Website must be a valid URL")
@@ -70,15 +75,18 @@ export const userCreateSchema = z.object({
   passwordHash: z.string().min(6, "Password must be at least 6 characters"),
 
   phone: z.string().optional().nullable(),
-
+  additionalPhone: z.string().optional().nullable(),
   role: UserRoleEnum.optional(),
-  commonditiId: z.string().optional().nullable(),
+  commodities: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (val ? (Array.isArray(val) ? val : [val]) : [])),
   profileImage: z
     .string()
     .url("Profile image must be a valid URL")
     .optional()
     .nullable(),
-
+  designation: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
 
   country: z.string().optional().nullable(),

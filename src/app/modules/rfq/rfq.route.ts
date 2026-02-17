@@ -9,6 +9,7 @@ import { previewRFQEmail } from "./rfq.service";
 export const router = Router();
 router.get("/email-preview", RFQController.previewRFQEmail);
 router.get("/", auth(), RFQController.getAllRFQs);
+router.get("/project/:projectId", auth(), RFQController.getRFQBYProjectId);
 router.get("/:rfqId", auth(), RFQController.getRFQById);
 router.post(
   "/",

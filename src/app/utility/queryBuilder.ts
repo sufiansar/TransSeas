@@ -279,7 +279,28 @@ export class PrismaQueryBuilder {
 
     const allowedOperators = ["gt", "gte", "lt", "lte", "equals", "in", "not"];
 
+    // Fields that typically indicate relations (ends with 'Id' or common relation names)
+    const isRelationField = (field: string): boolean => {
+      // If it's a direct foreign key (ends with Id), allow it
+      if (field.endsWith("Id")) return false;
+
+      // Common relation names in your schema
+      const relationNames = [
+        "commodity",
+        "project",
+        "vendor",
+        "category",
+        "user",
+      ];
+      return relationNames.includes(field);
+    };
+
     for (const [field, value] of Object.entries(queryObj)) {
+      // ✅ Skip relation fields (except foreign keys)
+      if (isRelationField(field)) {
+        continue;
+      }
+
       // ✅ If whitelist exists → enforce it
       if (filterableFields && !filterableFields.includes(field)) continue;
 

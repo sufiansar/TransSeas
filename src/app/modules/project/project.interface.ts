@@ -11,6 +11,7 @@ export interface IProject {
 
   status?: ProjectStatus;
   isActive?: boolean;
+  commoditiId?: string | null;
 
   totalPrice?: number | null;
   categoryId?: string | null;

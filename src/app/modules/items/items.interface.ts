@@ -5,11 +5,12 @@ export interface CreateItemDTO {
   quantity: number;
   manufacturer?: string;
   itemcode: string;
-  specifications?: string;
+  commoditiId?: string | null;
+  description?: string;
   price?: number;
   unit?: Unit;
+  remarks?: string;
   status?: ItemsStatus;
   rfqId?: string | null;
   projectId: string;
-  commonditiId?: string | null;
 }

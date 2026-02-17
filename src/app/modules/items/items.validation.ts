@@ -10,19 +10,16 @@ export const CreateItemsSchema = z
       .int("Quantity must be an integer")
       .positive("Quantity must be greater than 0"),
 
+    remarks: z.string().optional(),
+    commodityId: z.string().optional().nullable(),
     manufacturer: z
       .string()
       .min(1, "Manufacturer name cannot be empty")
       .optional(),
 
-    commonditiId: z.string().optional().nullable(),
-
     itemcode: z.string().min(1, "Item code is required"),
 
-    specifications: z
-      .string()
-      .min(1, "Specifications cannot be empty")
-      .optional(),
+    description: z.string().min(1, "Description cannot be empty").optional(),
 
     price: z
       .number({ message: "Price must be a number" })
@@ -61,15 +58,13 @@ export const UpdateItemsSchema = z
       .string()
       .min(1, "Manufacturer name cannot be empty")
       .optional(),
+    remarks: z.string().optional(),
 
-    commonditiId: z.string().optional().nullable(),
+    commodityId: z.string().optional().nullable(),
 
     itemcode: z.string().min(1, "Item code cannot be empty").optional(),
 
-    specifications: z
-      .string()
-      .min(1, "Specifications cannot be empty")
-      .optional(),
+    description: z.string().min(1, "Description cannot be empty").optional(),
 
     price: z
       .number({ message: "Price must be a number" })

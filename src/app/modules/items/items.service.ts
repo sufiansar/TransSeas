@@ -7,7 +7,7 @@ import { UserRole } from "@prisma/client";
 import { PrismaQueryBuilder } from "../../utility/queryBuilder";
 import { ItemsFilterableFields, ItemsSearchableFields } from "./items.constant";
 
-export const createItem = async (payload: CreateItemDTO) => {
+export const createItem = async (payload: CreateItemDTO, projectId: string) => {
   if (payload.quantity <= 0) {
     throw new AppError(
       HttpStatus.BAD_REQUEST,
@@ -31,13 +31,12 @@ export const createItem = async (payload: CreateItemDTO) => {
         quantity: payload.quantity,
         manufacturer: payload.manufacturer,
         itemcode: payload.itemcode,
-        specifications: payload.specifications,
-        price: payload.price,
+        description: payload.description || null,
         unit: payload.unit,
         status: payload.status,
-        rfqId: payload.rfqId,
         projectId: payload.projectId,
-        commonditiId: payload.commonditiId,
+        remarks: payload.remarks || null,
+        commodityId: payload.commodityId as string,
       },
     });
 
@@ -64,40 +63,6 @@ export const createItem = async (payload: CreateItemDTO) => {
   });
 };
 
-// const getAllItems = async (query: Record<string, any>, user: JwtPayload) => {
-//   const queryBuilder = new PrismaQueryBuilder(query);
-//   const itemsQuery = queryBuilder
-//     .filter(ItemsFilterableFields)
-//     .search(ItemsSearchableFields)
-//     .fields()
-//     .sort()
-//     .paginate();
-//   const [data, meta] = await Promise.all([
-//     prisma.items.findMany({
-//       ...itemsQuery.build(),
-//       include: {
-//         commodity: { select: { name: true } },
-//         project: { select: { name: true } },
-//       },
-//     }),
-//     queryBuilder.getMeta(prisma.items),
-//   ]);
-//   if (!user) {
-//     throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-//   }
-
-//   if (user.role !== UserRole.SUPER_ADMIN && user.role !== UserRole.ADMIN) {
-//     throw new AppError(
-//       HttpStatus.FORBIDDEN,
-//       "Only ADMIN and SUPER_ADMIN can access items",
-//     );
-//   }
-//   return {
-//     data,
-//     meta,
-//   };
-// };
-
 const getAllItems = async (query: Record<string, any>, user: JwtPayload) => {
   if (!user) {
     throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -120,54 +85,54 @@ const getAllItems = async (query: Record<string, any>, user: JwtPayload) => {
     .paginate()
     .build();
 
-  const andConditions: any[] = [];
+  // const andConditions: any[] = [];
 
-  // keep scalar filters from builder
-  if (builtQuery.where) {
-    andConditions.push(builtQuery.where);
-  }
+  // // keep scalar filters from builder
+  // if (builtQuery.where) {
+  //   andConditions.push(builtQuery.where);
+  // }
 
-  //  filter by commodityId (foreign key)
-  if (query.commodityId) {
-    andConditions.push({
-      commodityId: query.commodityId,
-    });
-  }
+  // //  filter by commodityId (foreign key)
+  // if (query.commodityId) {
+  //   andConditions.push({
+  //     commodityId: query.commodityId,
+  //   });
+  // }
 
-  // filter by projectId
-  if (query.projectId) {
-    andConditions.push({
-      projectId: query.projectId,
-    });
-  }
+  // // filter by projectId
+  // if (query.projectId) {
+  //   andConditions.push({
+  //     projectId: query.projectId,
+  //   });
+  // }
 
-  // filter by commodity name (relation)
-  if (query.commodity) {
-    andConditions.push({
-      commodity: {
-        name: {
-          contains: query.commodity,
-          mode: "insensitive",
-        },
-      },
-    });
-  }
+  // // filter by commodity name (relation)
+  // if (query.commodity) {
+  //   andConditions.push({
+  //     commodity: {
+  //       name: {
+  //         contains: query.commodity,
+  //         mode: "insensitive",
+  //       },
+  //     },
+  //   });
+  // }
 
-  // filter by project name (relation)
-  if (query.project) {
-    andConditions.push({
-      project: {
-        name: {
-          contains: query.project,
-          mode: "insensitive",
-        },
-      },
-    });
-  }
+  // // filter by project name (relation)
+  // if (query.project) {
+  //   andConditions.push({
+  //     project: {
+  //       name: {
+  //         contains: query.project,
+  //         mode: "insensitive",
+  //       },
+  //     },
+  //   });
+  // }
 
-  builtQuery.where = {
-    AND: andConditions,
-  };
+  // builtQuery.where = {
+  //   AND: andConditions,
+  // };
 
   const [data, meta] = await Promise.all([
     prisma.items.findMany({

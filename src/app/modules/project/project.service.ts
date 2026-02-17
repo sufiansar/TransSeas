@@ -14,6 +14,13 @@ export const createProject = async (payload: any, user: JwtPayload) => {
     throw new AppError(HttpStatus.FORBIDDEN, "Permission denied");
   }
 
+  // const commodities = await prisma.commodity.findMany({
+  //   select: {
+  //     id: true,
+  //     name: true,
+  //   },
+  // });
+
   const result = await prisma.$transaction(async (tx) => {
     const projectNumber = await generateProjectNumber(tx);
 
@@ -23,7 +30,8 @@ export const createProject = async (payload: any, user: JwtPayload) => {
         name: payload.name,
         clientName: payload.clientName,
         clientEmail: payload.clientEmail,
-        commodity: payload.commodity || null,
+        commoditiId: payload.commoditiId || null,
+        categoryId: payload.categoryId || null,
         status: payload.status || ProjectStatus.ACTIVE,
         isActive: payload.isActive ?? true,
         currency: payload.currency || Currency.USD,
@@ -51,7 +59,15 @@ const getAllProjects = async (query: Record<string, any>) => {
     prisma.project.findMany({
       ...projectsQuery.build(),
       include: {
-        items: true,
+        items: {
+          select: {
+            id: true,
+            itemTitle: true,
+            quantity: true,
+            price: true,
+            unit: true,
+          },
+        },
         vendor: {
           select: {
             id: true,
@@ -64,6 +80,19 @@ const getAllProjects = async (query: Record<string, any>) => {
           select: {
             id: true,
             name: true,
+          },
+        },
+        commodity: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        quotations: {
+          select: {
+            id: true,
+            number: true,
+            status: true,
           },
         },
       },
@@ -81,7 +110,15 @@ const getProjectById = async (id: string) => {
   const project = await prisma.project.findUnique({
     where: { id },
     include: {
-      items: true,
+      items: {
+        select: {
+          id: true,
+          itemTitle: true,
+          quantity: true,
+          price: true,
+          unit: true,
+        },
+      },
       vendor: {
         select: {
           id: true,
@@ -94,6 +131,25 @@ const getProjectById = async (id: string) => {
         select: {
           id: true,
           name: true,
+        },
+      },
+      commodity: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      quotations: {
+        select: {
+          id: true,
+          number: true,
+          status: true,
+          createdAt: true,
+        },
+      },
+      _count: {
+        select: {
+          items: true,
         },
       },
     },
@@ -140,6 +196,7 @@ const updateProject = async (
       status: payload.status ?? existingProject.status,
       isActive: payload.isActive ?? existingProject.isActive,
       totalPrice: payload.totalPrice ?? existingProject.totalPrice,
+      commoditiId: payload.commoditiId ?? existingProject.commoditiId,
       categoryId: payload.categoryId ?? existingProject.categoryId,
       currency: payload.currency ?? existingProject.currency,
       country: payload.country ?? existingProject.country,

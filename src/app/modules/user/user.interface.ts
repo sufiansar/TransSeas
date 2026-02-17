@@ -13,10 +13,13 @@ export interface IUser {
   otp?: number | null;
   city?: string | null;
   isVerified?: boolean;
-  commonditiId?: string | null;
+  commoditiId?: string | null;
+  commodities?: string[];
+  additionalPhone?: string | null;
   isActive?: boolean;
   userStatus?: UserStatus;
   companyName?: string | null;
+  designation?: string | null;
   categoryId?: string | null;
   website?: string | null;
 }
@@ -28,7 +31,8 @@ export interface IUserUpdate {
   passwordHash?: string;
 
   phone?: string | null;
-
+  additionalPhone?: string | null;
+  designation?: string | null;
   profileImage?: string | null;
   address?: string | null;
   country?: string | null;
@@ -36,7 +40,7 @@ export interface IUserUpdate {
 
   isVerified?: boolean;
   isActive?: boolean;
-
+  commodities?: string[] | null;
   userStatus?: UserStatus;
 
   companyName?: string | null;

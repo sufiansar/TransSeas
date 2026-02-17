@@ -147,10 +147,7 @@ const getme = async (userId: string) => {
 };
 
 const createInvite = async (email: string, role: UserRole, user: any) => {
-  if (
-    user.role === UserRole.VENDOR ||
-    user.role === UserRole.PROCUREMENT_TEAM
-  ) {
+  if (user.role === UserRole.VENDOR) {
     throw new AppError(HttpStatus.FORBIDDEN, "Not allowed to invite users");
   }
 

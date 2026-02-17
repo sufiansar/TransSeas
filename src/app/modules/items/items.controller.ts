@@ -7,7 +7,8 @@ import httpStatus from "http-status-codes";
 const createItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
-    const result = await ItemsService.createItem(payload);
+    const { projectId } = req.params;
+    const result = await ItemsService.createItem(payload, projectId as string);
     sendResponse(res, {
       statusCode: httpStatus.CREATED,
       success: true,

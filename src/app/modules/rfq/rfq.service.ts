@@ -118,6 +118,28 @@ export const previewRFQEmail = async (
   };
 };
 
+const getRFQBYProjectId = async (projectId: string) => {
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { id: true, name: true, commoditiId: true },
+  });
+  if (!project) throw new Error("Project not found");
+  if (!project.commoditiId) throw new Error("Project commodity ID not found");
+
+  const items = await prisma.items.findMany({
+    where: { commodityId: project.commoditiId },
+    select: { id: true, itemTitle: true },
+  });
+
+  const vendors = await prisma.user.findMany({
+    where: {
+      commoditiId: project.commoditiId,
+    },
+    select: { id: true, name: true, companyName: true },
+  });
+
+  return { items, vendors };
+};
 const getAllRFQs = async (query: any) => {
   const prismaQuery = new PrismaQueryBuilder(query);
   const builtQuery = prismaQuery
@@ -132,6 +154,7 @@ const getAllRFQs = async (query: any) => {
     include: {
       vendors: { select: { id: true, name: true, companyName: true } },
       items: { select: { id: true, itemTitle: true } },
+      project: { select: { name: true } },
     },
   });
   const meta = await prismaQuery.getMeta(prisma.rFQ);
@@ -144,6 +167,7 @@ const getRFQById = async (rfqId: string) => {
     include: {
       vendors: { select: { id: true, name: true, companyName: true } },
       items: { select: { id: true, itemTitle: true } },
+      project: { select: { name: true } },
     },
   });
   return rfq;
@@ -266,4 +290,5 @@ export const RFQService = {
   getRFQById,
   updateRFQ,
   deleteRFQ,
+  getRFQBYProjectId,
 };
