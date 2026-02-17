@@ -4,7 +4,7 @@ export const VendorFilterableFields = [
   "email",
   "phone",
   "category",
-  "commondity",
+  "commodities",
   "city",
   "country",
   "isActive",
@@ -17,7 +17,7 @@ export const VendorSearchableFields = [
   "email",
   "phone",
   "category",
-  "commondity",
+  "commodities",
   "city",
   "country",
 ];

@@ -17,11 +17,8 @@ const createUser = async (userData: IUser, user: any) => {
     throw new AppError(HttpStatus.CONFLICT, "User already exists");
   }
 
-  //  Vendor & Procurement Team cannot create users
-  if (
-    user.role === UserRole.VENDOR ||
-    user.role === UserRole.PROCUREMENT_TEAM
-  ) {
+  //  Vendor  cannot create users
+  if (user.role === UserRole.VENDOR) {
     throw new AppError(
       HttpStatus.FORBIDDEN,
       "You are not allowed to create users",
@@ -55,18 +52,11 @@ const createUser = async (userData: IUser, user: any) => {
   const newUser = await prisma.user.create({
     data: {
       name: userData.name || null,
-      companyName: userData.companyName || null,
       email: userData.email,
       passwordHash: hashedPassword,
       phone: userData.phone,
-      role: userData.role || UserRole.VENDOR,
-      commonditiId: userData?.commonditiId || null,
-      address: userData.address || null,
-      country: userData.country || null,
-      city: userData.city || null,
+      role: userData.role,
       profileImage: userData.profileImage || null,
-      categoryId: userData.categoryId || null,
-      website: userData.website || null,
       isVerified: userData.isVerified ?? false,
       isActive: userData.isActive ?? true,
     },
@@ -95,10 +85,7 @@ const getUserById = async (userId: string) => {
 
 const getAllUsers = async (currentUser: any) => {
   //These roles see nobody
-  if (
-    currentUser.role === UserRole.PROCUREMENT_TEAM ||
-    currentUser.role === UserRole.VENDOR
-  ) {
+  if (currentUser.role === UserRole.VENDOR) {
     throw new AppError(
       HttpStatus.FORBIDDEN,
       "You are not allowed to view users",
@@ -115,7 +102,7 @@ const getAllUsers = async (currentUser: any) => {
     return prisma.user.findMany({
       where: {
         role: {
-          in: [UserRole.VENDOR, UserRole.PROCUREMENT_TEAM],
+          in: [UserRole.VENDOR],
         },
       },
     });
@@ -138,7 +125,7 @@ const updateUser = async (
   const isAdmin =
     user.role === UserRole.ADMIN || user.role === UserRole.SUPER_ADMIN;
 
-  // 🚫 Only admins can update other users
+  // Only admins can update other users
   if (!isSelfUpdate && !isAdmin) {
     throw new AppError(
       HttpStatus.FORBIDDEN,
@@ -154,12 +141,11 @@ const updateUser = async (
     throw new AppError(HttpStatus.NOT_FOUND, "User not found");
   }
 
-  // 🚫 Users cannot change their own role
+  //  Users cannot change their own role
   if (isSelfUpdate && updateData.role) {
     throw new AppError(HttpStatus.FORBIDDEN, "You cannot change your own role");
   }
-
-  // 🚫 Optional: only admins can change status
+  //  Optional: only admins can change status
   if (updateData.userStatus && !isAdmin) {
     throw new AppError(
       HttpStatus.FORBIDDEN,
@@ -167,7 +153,7 @@ const updateUser = async (
     );
   }
 
-  // 🔐 Hash password if provided
+  // Hash password if provided
   if (updateData.passwordHash) {
     updateData.passwordHash = await bcrypt.hash(
       updateData.passwordHash,
@@ -175,12 +161,18 @@ const updateUser = async (
     );
   }
 
+  const updatePayload = Object.fromEntries(
+    Object.entries(updateData).filter(
+      ([, value]) => value !== null && value !== undefined,
+    ),
+  );
+
   const updatedUser = await prisma.user.update({
     where: { id: userId },
-    data: updateData,
+    data: updatePayload,
   });
 
-  // 🧹 Clean up old profile image
+  // Clean up old profile image
   if (updateData.profileImage && existingUser.profileImage) {
     try {
       await deleteFromS3(existingUser.profileImage);
@@ -212,7 +204,7 @@ const deleteUser = async (
   const isAdmin = currentUser.role === UserRole.ADMIN;
   const isSuperAdmin = currentUser.role === UserRole.SUPER_ADMIN;
 
-  // 🚫 Only ADMIN or SUPER_ADMIN can delete users
+  // Only ADMIN or SUPER_ADMIN can delete users
   if (!isAdmin && !isSuperAdmin) {
     throw new AppError(
       HttpStatus.FORBIDDEN,
@@ -220,12 +212,12 @@ const deleteUser = async (
     );
   }
 
-  // 🚫 ADMIN cannot delete SUPER_ADMIN
+  // ADMIN cannot delete SUPER_ADMIN
   if (isAdmin && targetUser.role === UserRole.SUPER_ADMIN) {
     throw new AppError(HttpStatus.FORBIDDEN, "ADMIN cannot delete SUPER_ADMIN");
   }
 
-  // ⚠️ Prevent deleting last SUPER_ADMIN
+  // Prevent deleting last SUPER_ADMIN
   if (targetUser.role === UserRole.SUPER_ADMIN) {
     const superAdminCount = await prisma.user.count({
       where: { role: UserRole.SUPER_ADMIN },

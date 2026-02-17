@@ -71,6 +71,17 @@ const getRFQById = async (req: Request, res: Response) => {
   });
 };
 
+const getRFQBYProjectId = async (req: Request, res: Response) => {
+  const { projectId } = req.params;
+  const result = await RFQService.getRFQBYProjectId(projectId as string);
+  sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: "RFQ retrieved successfully",
+    data: result,
+  });
+};
+
 const updateRFQ = async (req: Request, res: Response) => {
   const { rfqId } = req.params;
   const payload = req.body;
@@ -99,6 +110,7 @@ export const RFQController = {
   previewRFQEmail,
   getAllRFQs,
   getRFQById,
+  getRFQBYProjectId,
   updateRFQ,
   deleteRFQ,
 };

@@ -18,6 +18,7 @@ export const CreateProjectSchema = z.object({
       message: "Invalid project status",
     })
     .optional(),
+  commoditiId: z.string().optional().nullable(),
 
   isActive: z.boolean().optional().default(true),
 
@@ -47,6 +48,8 @@ export const UpdateProjectSchema = z
     referenceNo: z.string().min(1, "Reference number is required").optional(),
 
     commodity: z.string().optional().nullable(),
+
+    commoditiId: z.string().optional().nullable(),
 
     status: z
       .nativeEnum(ProjectStatus, {

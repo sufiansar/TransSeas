@@ -3,12 +3,15 @@ export const ProjectSearchableFields = [
   "referenceNo",
   "vendorName",
   "category",
+  "searchTerm",
 ];
 
 export const ProjectFilterableFields = [
   "isActive",
   "status",
   "searchTerm",
+  "commodity",
+  // "commoditiId",
   "currency",
   "category",
   "createdAt",
