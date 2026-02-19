@@ -5,7 +5,9 @@ import { OTP_EXPIRATION } from "../../helper/generateOtp";
 import { prisma } from "../../config/prisma";
 import { generateRFQPdf } from "../../utility/generateRFQPdf";
 import { generateRFQExcel } from "../../utility/generateRFQExcel";
-
+import fs from "fs/promises";
+import AppError from "../../errorHelpers/AppError";
+import HttpStatus from "http-status";
 /* -----------------------------
    Job payload types
 ----------------------------- */
@@ -17,6 +19,7 @@ type MailJobData =
   | { email: string; name: string; resetUILink: string } // forgotPassword
   | {
       email: string;
+      referenceNo: string;
       companyName: string;
       rfqNo: string;
       emailSubject: string;
@@ -48,6 +51,7 @@ export const mailWorker = new Worker(
             email: string;
             companyName: string;
             rfqNo: string;
+            referenceNo: string;
             emailSubject: string;
             emailBody: string;
             terms: string;
@@ -191,12 +195,11 @@ export async function handleFollowUpEmail(data: {
   });
 }
 
-import fs from "fs/promises";
-
 export async function handleRFQEmail(data: {
   email: string;
   companyName: string;
   rfqNo: string;
+  referenceNo: string;
   emailSubject: string;
   emailBody: string;
   itemIds: string[];
@@ -208,9 +211,19 @@ export async function handleRFQEmail(data: {
     },
   });
 
+  const project = await prisma.project.findUnique({
+    where: {
+      referenceNo: data.referenceNo,
+    },
+  });
+
+  if (!project) {
+    throw new AppError(HttpStatus.NOT_FOUND, "Project not found");
+  }
+
   // 2. Generate PDF & Excel
-  const pdfPath = await generateRFQPdf(items, data.rfqNo);
-  const excelPath = await generateRFQExcel(items, data.rfqNo);
+  const pdfPath = await generateRFQPdf(items, data.rfqNo, data.referenceNo);
+  const excelPath = await generateRFQExcel(items, data.rfqNo, data.referenceNo);
 
   // 3. Read files into buffers
   const pdfBuffer = await fs.readFile(pdfPath);

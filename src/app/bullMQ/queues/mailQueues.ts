@@ -42,6 +42,7 @@ export const addForgotPasswordJob = (
 export const addRFQMailJob = (
   email: string,
   companyName: string,
+  referenceNo: string,
   rfqNo: string,
   emailSubject: string,
   emailBody: string,
@@ -51,6 +52,7 @@ export const addRFQMailJob = (
   return mailQueue.add("sendRFQ", {
     email,
     companyName,
+    referenceNo,
     rfqNo,
     emailSubject,
     emailBody,
@@ -58,6 +60,8 @@ export const addRFQMailJob = (
     itemIds,
   });
 };
+
+console.log("Mail queue initialized", addRFQMailJob);
 // --------------------
 // Invite user onboarding email
 // --------------------
