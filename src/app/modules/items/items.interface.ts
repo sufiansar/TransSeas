@@ -5,7 +5,7 @@ export interface CreateItemDTO {
   quantity: number;
   manufacturer?: string;
   itemcode: string;
-  commoditiId?: string | null;
+  commodityId?: string;
   description?: string;
   price?: number;
   unit?: Unit;

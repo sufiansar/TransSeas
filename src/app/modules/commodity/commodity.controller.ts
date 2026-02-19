@@ -32,6 +32,40 @@ const getAllCommodities = catchAsync(
   },
 );
 
+const getVendorsByCommonditiId = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { commodityId } = req.params;
+    const user = req.user,
+      result = await CommodityService.getVendorsByCommonditiId(
+        commodityId as string,
+        user,
+      );
+    sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: "Vendors retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+const getItemsByCommonditiId = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { commodityId } = req.params;
+    const user = req.user;
+    const result = await CommodityService.getItemsByCommonditiId(
+      commodityId as string,
+      user,
+    );
+    sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: "Items retrieved successfully",
+      data: result,
+    });
+  },
+);
+
 const getCommodityById = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { commodityId } = req.params;
@@ -88,6 +122,8 @@ export const CommodityController = {
   createCommodity,
   getAllCommodities,
   getCommodityById,
+  getVendorsByCommonditiId,
+  getItemsByCommonditiId,
   updateCommodity,
   deleteCommodity,
 };

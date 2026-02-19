@@ -288,9 +288,12 @@ export async function parseAndSave(
       number: quotationNumber,
       fileType: lower.endsWith(".pdf") ? "PDF" : "EXCEL",
       sourceFile: storedPath,
-      items: {
-        create: items,
+      project: {
+        connect: { id: "" },
       },
+      // items: {
+      //   create: items,
+      // },
     },
   });
 }
