@@ -78,61 +78,12 @@ const getAllItems = async (query: Record<string, any>, user: JwtPayload) => {
   const queryBuilder = new PrismaQueryBuilder(query);
 
   const builtQuery = queryBuilder
-    .filter(ItemsFilterableFields) // scalar fields only
+    .filter(ItemsFilterableFields)
     .search(ItemsSearchableFields)
     .fields()
     .sort()
     .paginate()
     .build();
-
-  // const andConditions: any[] = [];
-
-  // // keep scalar filters from builder
-  // if (builtQuery.where) {
-  //   andConditions.push(builtQuery.where);
-  // }
-
-  // //  filter by commodityId (foreign key)
-  // if (query.commodityId) {
-  //   andConditions.push({
-  //     commodityId: query.commodityId,
-  //   });
-  // }
-
-  // // filter by projectId
-  // if (query.projectId) {
-  //   andConditions.push({
-  //     projectId: query.projectId,
-  //   });
-  // }
-
-  // // filter by commodity name (relation)
-  // if (query.commodity) {
-  //   andConditions.push({
-  //     commodity: {
-  //       name: {
-  //         contains: query.commodity,
-  //         mode: "insensitive",
-  //       },
-  //     },
-  //   });
-  // }
-
-  // // filter by project name (relation)
-  // if (query.project) {
-  //   andConditions.push({
-  //     project: {
-  //       name: {
-  //         contains: query.project,
-  //         mode: "insensitive",
-  //       },
-  //     },
-  //   });
-  // }
-
-  // builtQuery.where = {
-  //   AND: andConditions,
-  // };
 
   const [data, meta] = await Promise.all([
     prisma.items.findMany({

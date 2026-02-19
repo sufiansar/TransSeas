@@ -51,7 +51,7 @@ const getAllProjects = async (query: Record<string, any>) => {
 
   const projectsQuery = queryBuilder
     .filter(ProjectFilterableFields)
-    .search(["name", "vendorName", "referenceNo"])
+    .search(["name", "companyName", "referenceNo"])
     .fields()
     .sort()
     .paginate();
@@ -83,9 +83,9 @@ const getAllProjects = async (query: Record<string, any>) => {
           },
         },
         commodity: {
-          select: {
-            id: true,
-            name: true,
+          include: {
+            vendors: { select: { id: true, name: true, companyName: true } },
+            items: { select: { id: true, itemTitle: true } },
           },
         },
         quotations: {
