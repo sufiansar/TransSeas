@@ -15,34 +15,34 @@ datasource db {
 }
 
 model User {
-  id           String @id @default(auto()) @map("_id") @db.ObjectId
-  name         String?
-  email        String @unique
-  passwordHash String
-  phone        String?
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  email           String     @unique
+  passwordHash    String
+  phone           String?
   additionalPhone String?
-  role         UserRole @default(VENDOR)
-  profileImage String?
-  address      String?
-  country      String?
-  city         String?
-  otp          Int?
-  isVerified   Boolean @default(true)
-  isActive     Boolean @default(true)
-  userStatus   UserStatus @default(ACTIVE)
-  companyName  String?
-  categoryId   String? @db.ObjectId
-  category     category? @relation(fields: [categoryId], references: [id])
-  website      String?
-  designation   String?
-  rfqId        String? @db.ObjectId
-  rfq          RFQ? @relation(fields: [rfqId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  orders       Order[]
-  projects     Project[]
-  commoditiId String? @db.ObjectId
-  commodity    Commodity? @relation(fields: [commoditiId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role            UserRole   @default(VENDOR)
+  profileImage    String?
+  address         String?
+  country         String?
+  city            String?
+  otp             Int?
+  isVerified      Boolean    @default(true)
+  isActive        Boolean    @default(true)
+  userStatus      UserStatus @default(ACTIVE)
+  companyName     String?
+  categoryId      String?    @db.ObjectId
+  category        category?  @relation(fields: [categoryId], references: [id])
+  website         String?
+  designation     String?
+  rfqId           String?    @db.ObjectId
+  rfq             RFQ?       @relation(fields: [rfqId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orders          Order[]
+  projects        Project[]
+  commoditiId     String?    @db.ObjectId
+  commodity       Commodity? @relation(fields: [commoditiId], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   @@map("users")
 }
@@ -58,42 +58,44 @@ model Invite {
 }
 
 model Project {
-  id            String @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  clientName    String?
-  clientEmail    String?
-  vendorId        String? @db.ObjectId
-  vendor          User? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
-  referenceNo   String @unique
-  commoditiId      String? @db.ObjectId
-  commodity        Commodity? @relation(fields: [commoditiId], references: [id],onDelete: SetNull)
-  status        ProjectStatus @default(ACTIVE)
-  isActive      Boolean @default(true)
-  totalPrice    Float?
-  categoryId       String? @db.ObjectId
-  category         category? @relation(fields: [categoryId], references: [id])
-  currency      Currency? @default(USD)
-  country       String?
-  location      String
-  documents     documents[]
+  id                   String                @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String
+  clientName           String?
+  clientEmail          String?
+  vendorId             String?               @db.ObjectId
+  vendor               User?                 @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  referenceNo          String                @unique
+  commoditiId          String?               @db.ObjectId
+  commodity            Commodity?            @relation(fields: [commoditiId], references: [id], onDelete: SetNull)
+  status               ProjectStatus         @default(ACTIVE)
+  isActive             Boolean               @default(true)
+  totalPrice           Float?
+  categoryId           String?               @db.ObjectId
+  category             category?             @relation(fields: [categoryId], references: [id])
+  currency             Currency?             @default(USD)
+  country              String?
+  location             String
+  documents            documents[]
   manufacturerPackages ManufacturerPackage[]
-  rfqs          RFQ[]
-  quotations     Quotation[]
+  rfqs                 RFQ[]
+  quotations           Quotation[]
   // costSheets    CostSheet[]
   // proposals     Proposal[]
   // activities    ActivityLog[]
   // assignedUsers ProjectUser[]
-  items         Items[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-@@index([vendorId, referenceNo])
+  items                Items[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([vendorId, referenceNo])
   @@map("projects")
 }
+
 model documents {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  fileName  String
-  fileType  String
-  fileUrl   String
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  fileName String
+  fileType String
+  fileUrl  String
 
   projectId String  @db.ObjectId
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -104,63 +106,65 @@ model documents {
   @@index([projectId])
   @@map("documents")
 }
+
 model ManufacturerPackage {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
   packageName String
   description String?
 
-  projectId   String  @db.ObjectId
-  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String  @db.ObjectId
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([projectId])
   @@map("manufacturerPackages")
 }
 
 model Items {
-  id              String @id @default(auto()) @map("_id") @db.ObjectId
-  itemTitle       String?
-  itemcode        String
-  manufacturer    String?
-  description     String?
-  quantity        Float                    
-  unit            Unit @default(PIECE)
-  price           Float?
-  remarks         String?                  
-  status          ItemsStatus @default(PENDING)
-  rfqId           String? @db.ObjectId
-  rfq             RFQ? @relation(fields: [rfqId], references: [id], onDelete: SetNull)
-  projectId       String @db.ObjectId
-  project         Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  commodityId String @db.ObjectId
-  commodity   Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  itemTitle    String?
+  itemcode     String
+  manufacturer String?
+  description  String?
+  quantity     Float
+  unit         Unit        @default(PIECE)
+  price        Float?
+  remarks      String?
+  status       ItemsStatus @default(PENDING)
+  rfqId        String?     @db.ObjectId
+  rfq          RFQ?        @relation(fields: [rfqId], references: [id], onDelete: SetNull)
+  projectId    String      @db.ObjectId
+  project      Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  commodityId  String      @db.ObjectId
+  commodity    Commodity   @relation(fields: [commodityId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@index([projectId, rfqId])
   @@map("items")
 }
 
-
 model category {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  name      String @unique
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String    @unique
   projcet   Project[]
   vendors   User[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   @@map("categories")
 }
-model Commodity {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  name      String @unique
 
-  rfq       RFQ[]
-  vendors   User[]
-  project   Project[]
-  items     Items[]
+model Commodity {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String @unique
+
+  rfq     RFQ[]
+  vendors User[]
+  project Project[]
+  items   Items[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -168,53 +172,48 @@ model Commodity {
   @@map("commodities")
 }
 
-
-
 model RFQ {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  rfqNo       String @unique
-  projectId   String @db.ObjectId
-  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  vendors    User[]
-  items       Items[]
-  terms       String?
-  dueDate    DateTime
-  emailSubject String?
-  rfqStatus   rfqStatus @default(SENT)
-  commodityId    String? @db.ObjectId
-  commodity      Commodity? @relation(fields: [commodityId], references: [id])
-  quatationId    String? @db.ObjectId
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  rfqNo         String     @unique
+  projectId     String     @db.ObjectId
+  project       Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  vendors       User[]
+  items         Items[]
+  terms         String?
+  dueDate       DateTime
+  emailSubject  String?
+  rfqStatus     rfqStatus  @default(SENT)
+  commodityId   String?    @db.ObjectId
+  commodity     Commodity? @relation(fields: [commodityId], references: [id])
+  quatationId   String?    @db.ObjectId
   quotation     Quotation? @relation(fields: [quatationId], references: [id], onDelete: SetNull)
-  emailMessage String?
+  emailMessage  String?
   followUpEmail String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-@@index([projectId])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([projectId])
   @@map("rfqs")
 }
 
 model Quotation {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  number        String   @unique   
-  vendorid   String?
-  
-  subject       String?
-  sourceFile    String?   
-  fileType      FileType?
-  status        QuotationStatus @default(PARSED)
-  rfq           RFQ[]
-  projectId     String   @db.ObjectId
-  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  // items         Items[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  number   String  @unique
+  vendorid String?
 
+  subject    String?
+  sourceFile String?
+  fileType   FileType?
+  status     QuotationStatus @default(PARSED)
+  rfq        RFQ[]
+  projectId  String          @db.ObjectId
+  project    Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  // items         Items[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 
   @@map("quotations")
 }
-
-
-
 
 enum rfqStatus {
   SENT
@@ -230,111 +229,102 @@ enum FileType {
 }
 
 enum QuotationStatus {
- NEEDS_REVIEW
+  NEEDS_REVIEW
   RECEIVED
   APPROVED
- PARSED
+  PARSED
 }
 
-
-
-
-
-
 model Order {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  userId      String? @db.ObjectId
-  user        User? @relation(fields: [userId], references: [id])
+  userId String? @db.ObjectId
+  user   User?   @relation(fields: [userId], references: [id])
 
-  status      OrderStatus @default(PENDING)
-  amount      Float
-  orderDate   DateTime @default(now())
+  status    OrderStatus @default(PENDING)
+  amount    Float
+  orderDate DateTime    @default(now())
 
   shipment    Shipment?    @relation("OrderShipment")
   payment     Payment?     @relation("OrderPayment")
   transaction Transaction? @relation("OrderTransaction")
   delivery    Delivery?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@map("orders")
 }
 
-
-
-
 model Shipment {
-  id             String @id @default(auto()) @map("_id") @db.ObjectId
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
   carrier        String
   trackingNumber String
   shippedDate    DateTime
   deliveryDate   DateTime?
-  orderId        String @unique @db.ObjectId
-  order          Order @relation("OrderShipment", fields: [orderId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  orderId        String    @unique @db.ObjectId
+  order          Order     @relation("OrderShipment", fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
   @@map("shipments")
 }
 
-
-
-
-
 model Delivery {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  orderId   String @unique @db.ObjectId
-  order     Order @relation(fields: [orderId], references: [id])
+  orderId String @unique @db.ObjectId
+  order   Order  @relation(fields: [orderId], references: [id])
 
-  name      String?
-  email     String?
-  address   String
-  city      String
-  phone     String
-  postalCode String?
+  name           String?
+  email          String?
+  address        String
+  city           String
+  phone          String
+  postalCode     String?
   deliveryCharge Float?
-  status    DeliveryStatus @default(PROCESSING)
+  status         DeliveryStatus @default(PROCESSING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("deliveries")
 }
 
 model Payment {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
   method    String
   amount    Float
   userId    String?
-  orderId   String? @unique @db.ObjectId
-  order     Order? @relation("OrderPayment", fields: [orderId], references: [id], onDelete: SetNull)
+  orderId   String?        @unique @db.ObjectId
+  order     Order?         @relation("OrderPayment", fields: [orderId], references: [id], onDelete: SetNull)
   status    PAYMENT_STATUS @default(PENDING)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
   @@map("payments")
 }
 
 model Transaction {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  orderId   String @unique @db.ObjectId
-  order     Order @relation("OrderTransaction", fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String @unique @db.ObjectId
+  order   Order  @relation("OrderTransaction", fields: [orderId], references: [id], onDelete: Cascade)
 
-  status    String
+  status          String
   transactionDate DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
   @@map("transactions")
 }
-
 
 enum UserRole {
   SUPER_ADMIN
   ADMIN
   VENDOR
 }
-
 
 enum ProjectStatus {
   ACTIVE
@@ -363,7 +353,6 @@ enum Currency {
   BDT
   PKR
   INR
-
 }
 
 enum UserStatus {
@@ -372,26 +361,27 @@ enum UserStatus {
   SUSPENDED
   DELETED
 }
+
 enum ItemsStatus {
   PENDING
   APPROVED
   EIDITED
   LOCKED
 }
+
 enum Unit {
-  PIECE        // pcs
+  PIECE // pcs
   SQUARE_METER // sqm
   LINEAR_METER // lm
-  KILOGRAM     // kg
+  KILOGRAM // kg
   SET
   LOT
-  CUBIC_METER  // m3
-  TONNE        // ton
+  CUBIC_METER // m3
+  TONNE // ton
   ROLL
   SHEET
   BOX
 }
-
 
 enum PAYMENT_STATUS {
   PENDING
@@ -401,7 +391,6 @@ enum PAYMENT_STATUS {
   REFUNDED
   PARTIALLY_REFUNDED
 }
-
 
 enum DeliveryStatus {
   PROCESSING
@@ -417,16 +406,3 @@ enum OrderStatus {
   REJECTED
   DELIVERED
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
