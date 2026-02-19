@@ -39,6 +39,7 @@ model User {
   rfq          RFQ? @relation(fields: [rfqId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   orders       Order[]
   projects     Project[]
+ quatations     Quotation[]
   commoditiId String? @db.ObjectId
   commodity    Commodity? @relation(fields: [commoditiId], references: [id])
   createdAt    DateTime @default(now())
@@ -134,6 +135,7 @@ model Items {
   rfq             RFQ? @relation(fields: [rfqId], references: [id], onDelete: SetNull)
   projectId       String @db.ObjectId
   project         Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  quatationsItems QuotationItem[]
   commodityId String @db.ObjectId
   commodity   Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
@@ -196,23 +198,36 @@ model RFQ {
 model Quotation {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   number        String   @unique   
-  vendorid   String?
-  
+  vendorId      String?  @db.ObjectId
+  vendor        User?    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   subject       String?
   sourceFile    String?   
   fileType      FileType?
   status        QuotationStatus @default(PARSED)
   rfq           RFQ[]
+  quotationItems QuotationItem[]
   projectId     String   @db.ObjectId
-  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project       Project  @relation(fields: [projectId], references: [id])
   // items         Items[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
-
   @@map("quotations")
 }
 
+model QuotationItem {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  quotationId  String   @db.ObjectId
+  quotation    Quotation @relation(fields: [quotationId], references: [id],onDelete: Cascade)
+  itemId       String   @db.ObjectId
+  item         Items    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  quantity     Float
+  unitPrice    Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("quatationItems")
+  @@index([quotationId, itemId])
+}
 
 
 

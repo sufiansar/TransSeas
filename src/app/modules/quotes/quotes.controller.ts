@@ -17,6 +17,22 @@ const createQuotation = catchAsync(
   },
 );
 
+const getAllQuotations = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const user = req.user;
+    const quotations = await QuotationService.getAllQuotations(query, user);
+    console.log("User in controller:", user);
+    sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: "Quotations retrieved successfully",
+      data: quotations,
+    });
+  },
+);
+
 export const QuotesController = {
   createQuotation,
+  getAllQuotations,
 };

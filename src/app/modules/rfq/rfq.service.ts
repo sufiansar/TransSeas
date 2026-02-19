@@ -14,6 +14,11 @@ const createRFQDto = async (data: IRFQ) => {
     where: { id: data.projectId },
     select: { name: true },
   });
+
+  const project = await prisma.project.findUnique({
+    where: { id: data.projectId },
+    select: { name: true, referenceNo: true },
+  });
   const result = await prisma.$transaction(async (tx) => {
     const vendors = await tx.user.findMany({
       where: {
@@ -32,6 +37,7 @@ const createRFQDto = async (data: IRFQ) => {
     if (vendors.length !== data.vendors.length) {
       throw new Error("Some selected users are not vendors");
     }
+
     const rfqNo = await generateRFQNumber(tx);
     const { subject, body } = generateRFQEmail({
       rfqNo,
@@ -64,6 +70,7 @@ const createRFQDto = async (data: IRFQ) => {
         addRFQMailJob(
           vendor.email,
           vendor.companyName || vendor.name || "Valued Vendor",
+          project?.referenceNo || "N/A",
           rfqNo,
           emailSubject,
           emailMessage,
@@ -107,6 +114,7 @@ export const previewRFQEmail = async (
     rfqNo,
     dueDate,
     projectName: project.name,
+    // referenceNo: project?.referenceNo || "N/A",
   });
 
   return {
@@ -181,14 +189,10 @@ const updateRFQ = async (rfqId: string, data: Partial<IRFQ>) => {
 
   if (!existingRFQ) throw new Error("RFQ not found");
 
-  const projectName = data.projectId
-    ? (
-        await prisma.project.findUnique({
-          where: { id: data.projectId },
-          select: { name: true },
-        })
-      )?.name
-    : undefined;
+  const project = await prisma.project.findUnique({
+    where: { id: data.projectId || existingRFQ.projectId },
+    select: { name: true, referenceNo: true },
+  });
   const result = await prisma.$transaction(async (tx) => {
     let vendors: {
       id: string;
@@ -222,7 +226,7 @@ const updateRFQ = async (rfqId: string, data: Partial<IRFQ>) => {
     const { subject, body } = generateRFQEmail({
       rfqNo: existingRFQ.rfqNo,
       dueDate: data.dueDate ?? existingRFQ.dueDate,
-      projectName,
+      projectName: project?.name || "Unknown Project",
     });
 
     const emailSubject = data.emailSubject || subject;
@@ -252,6 +256,7 @@ const updateRFQ = async (rfqId: string, data: Partial<IRFQ>) => {
         addRFQMailJob(
           vendor.email,
           vendor.companyName || vendor.name || "Valued Vendor",
+          project?.referenceNo || "N/A",
           existingRFQ.rfqNo,
           emailSubject,
           data.terms as string,

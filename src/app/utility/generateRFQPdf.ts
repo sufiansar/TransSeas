@@ -3,7 +3,11 @@ import fs from "fs";
 import fsPromises from "fs/promises";
 import path from "path";
 
-export const generateRFQPdf = async (items: any[], rfqNo: string) => {
+export const generateRFQPdf = async (
+  items: any[],
+  rfqNo: string,
+  referenceNo: string,
+) => {
   const tmpDir = path.join(process.cwd(), "tmp");
   await fsPromises.mkdir(tmpDir, { recursive: true });
 
@@ -23,7 +27,8 @@ export const generateRFQPdf = async (items: any[], rfqNo: string) => {
     .fontSize(18)
     .text("REQUEST FOR QUOTATION", 0, 40, { align: "center" })
     .fontSize(12)
-    .text(`RFQ No: ${rfqNo}`, { align: "center" });
+    .text(`RFQ No: ${rfqNo}`, { align: "center" })
+    .text(`Project REF No: ${referenceNo}`, { align: "center" });
 
   /* ✅ more breathing room after logo */
   doc.moveDown(4);
@@ -38,9 +43,9 @@ export const generateRFQPdf = async (items: any[], rfqNo: string) => {
     "Manufacturer",
     "Qty",
     "Unit",
-    "Price",
-    "Specifications",
-    "Status",
+    // "Price",
+    // "Specifications",
+    // "Status",
   ];
 
   const drawRow = (y: number, row: string[], bold = false) => {
@@ -83,12 +88,13 @@ export const generateRFQPdf = async (items: any[], rfqNo: string) => {
     y += drawRow(y, [
       item.itemTitle,
       item.itemcode,
-      item.menufacturer,
+      item.manufacturer,
       String(item.quantity),
       item.unit,
-      String(item.price ?? "N/A"),
-      item.specifications,
-      item.status,
+
+      // String(item.price ?? "N/A"),
+      // item.specifications,
+      // item.status,
     ]);
   }
 
