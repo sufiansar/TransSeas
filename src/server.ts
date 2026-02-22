@@ -32,7 +32,7 @@ async function startServer() {
       console.log(
         `Database connected successfully.${process.env.DATABASE_URL}`,
       );
-      console.log(`🚀 Server is running on port ${process.env.PORT}`);
+      console.log(`🚀 Server is running on url  http://localhost:${process.env.PORT}`);
     });
 
     handleProcessEvents();
