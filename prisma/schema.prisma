@@ -44,28 +44,7 @@ model User {
   commodity    Commodity? @relation(fields: [commoditiId], references: [id])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  role            UserRole   @default(VENDOR)
-  profileImage    String?
-  address         String?
-  country         String?
-  city            String?
-  otp             Int?
-  isVerified      Boolean    @default(true)
-  isActive        Boolean    @default(true)
-  userStatus      UserStatus @default(ACTIVE)
-  companyName     String?
-  categoryId      String?    @db.ObjectId
-  category        category?  @relation(fields: [categoryId], references: [id])
-  website         String?
-  designation     String?
-  rfqId           String?    @db.ObjectId
-  rfq             RFQ?       @relation(fields: [rfqId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  orders          Order[]
-  projects        Project[]
-  commoditiId     String?    @db.ObjectId
-  commodity       Commodity? @relation(fields: [commoditiId], references: [id])
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  
 
   @@map("users")
 }
@@ -165,24 +144,6 @@ model Items {
   commodity   Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  id           String      @id @default(auto()) @map("_id") @db.ObjectId
-  itemTitle    String?
-  itemcode     String
-  manufacturer String?
-  description  String?
-  quantity     Float
-  unit         Unit        @default(PIECE)
-  price        Float?
-  remarks      String?
-  status       ItemsStatus @default(PENDING)
-  rfqId        String?     @db.ObjectId
-  rfq          RFQ?        @relation(fields: [rfqId], references: [id], onDelete: SetNull)
-  projectId    String      @db.ObjectId
-  project      Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  commodityId  String      @db.ObjectId
-  commodity    Commodity   @relation(fields: [commodityId], references: [id], onDelete: Cascade)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
 
   @@index([projectId, rfqId])
   @@map("items")
@@ -274,23 +235,6 @@ model QuotationItem {
 
 
 
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  number   String  @unique
-  vendorid String?
-
-  subject    String?
-  sourceFile String?
-  fileType   FileType?
-  status     QuotationStatus @default(PARSED)
-  rfq        RFQ[]
-  projectId  String          @db.ObjectId
-  project    Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  // items         Items[]
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
-
-  @@map("quotations")
-}
 
 enum rfqStatus {
   SENT
