@@ -7,7 +7,8 @@ import { UserService } from "./user.service";
 const createUser = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
   const userData = req.body || JSON.parse(req.body.data);
-  const profileImage = req.file?.path;
+
+  const profileImage = (req.file as any)?.location;
   if (profileImage) {
     userData.profileImage = profileImage;
   }
@@ -49,7 +50,7 @@ const updateUser = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
   const userId = req.params.id;
   const updateData = req.body || JSON.parse(req.body.data);
-  const profileImage = req.file?.path;
+  const profileImage = (req.file as any)?.location;
   if (profileImage) {
     updateData.profileImage = profileImage;
   }
