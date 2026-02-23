@@ -148,7 +148,7 @@ async function sendOtpEmail({
     subject: "Your OTP Code",
     templateName: "otp",
     templateData: {
-      name: name || "there", // fallback safety
+      name: name || "there",
       otp,
       expiry: expiryMinutes,
     },
@@ -194,7 +194,6 @@ export async function handleFollowUpEmail(data: {
     },
   });
 }
-
 export async function handleRFQEmail(data: {
   email: string;
   companyName: string;
@@ -259,11 +258,9 @@ export async function handleRFQEmail(data: {
   await fs.unlink(pdfPath);
   await fs.unlink(excelPath);
 }
-
 /* -----------------------------
    Logs
 ----------------------------- */
-
 mailWorker.on("completed", (job) => {
   console.log(`✅ Mail job completed: ${job.name}`);
 });

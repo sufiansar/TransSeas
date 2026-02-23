@@ -6,7 +6,7 @@ import {
 import dbConfig from "./db.config";
 import path from "path";
 
-// Initialize S3 client
+//Initialize S3 client
 export const s3 = new S3Client({
   region: dbConfig.aws.region,
   credentials: {
@@ -15,7 +15,6 @@ export const s3 = new S3Client({
   },
 });
 
-// Helper to get MIME type from file extension
 const getContentType = (fileName: string): string => {
   const ext = path.extname(fileName).toLowerCase();
   switch (ext) {
@@ -35,13 +34,10 @@ const getContentType = (fileName: string): string => {
     case ".csv":
       return "text/csv";
     default:
-      return "application/octet-stream"; // fallback generic type
+      return "application/octet-stream";
   }
 };
 
-/**
- * Uploads a buffer to S3
- */
 export const uploadBufferToS3 = async (
   buffer: Buffer,
   fileName: string,

@@ -34,7 +34,7 @@ const storage = multerS3({
       .toString(36)
       .substring(2)}-${cleanName}${ext}`;
 
-    // 📂 Determine folder based on MIME type
+    // Determine folder based on MIME type
     let folder = "others";
     switch (file.mimetype) {
       case "application/pdf":

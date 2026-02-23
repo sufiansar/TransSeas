@@ -43,6 +43,7 @@ export const generateRFQPdf = async (
     "Manufacturer",
     "Qty",
     "Unit",
+    "Description",
     // "Price",
     // "Specifications",
     // "Status",
@@ -91,6 +92,7 @@ export const generateRFQPdf = async (
       item.manufacturer,
       String(item.quantity),
       item.unit,
+      item.description || "N/A",
 
       // String(item.price ?? "N/A"),
       // item.specifications,

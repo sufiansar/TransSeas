@@ -65,6 +65,7 @@ const createRFQDto = async (data: IRFQ) => {
         },
       },
     });
+    console.log("RFQ created with ID:", rfq);
     await Promise.all(
       vendors.map((vendor) =>
         addRFQMailJob(
@@ -125,7 +126,6 @@ export const previewRFQEmail = async (
     emailPreview,
   };
 };
-
 const getRFQBYProjectId = async (projectId: string) => {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -168,7 +168,6 @@ const getAllRFQs = async (query: any) => {
   const meta = await prismaQuery.getMeta(prisma.rFQ);
   return { data: rfqs, meta };
 };
-
 const getRFQById = async (rfqId: string) => {
   const rfq = await prisma.rFQ.findUnique({
     where: { id: rfqId },
