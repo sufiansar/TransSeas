@@ -162,12 +162,10 @@ model category {
 model Commodity {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
   name String @unique
-
   rfq     RFQ[]
   vendors User[]
   project Project[]
   items   Items[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
