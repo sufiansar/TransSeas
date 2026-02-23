@@ -120,7 +120,7 @@ const forgotPassword = async (email: string) => {
     },
   );
 
-  const resetUILink = `${dbConfig.frontEnd_url}/reset-Password?id=${isUserExit.id}&token=${resetLink}`;
+  const resetUILink = `${dbConfig.frontEnd_url}/reset-password?id=${isUserExit.id}&token=${resetLink}`;
 
   const result = await addForgotPasswordJob(
     isUserExit.email,
