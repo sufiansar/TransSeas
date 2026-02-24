@@ -8,7 +8,7 @@ router.get("/me", auth(), AuthController.getme);
 router.get("/verify", AuthController.verifyInvite);
 router.post("/login", AuthController.loginUser);
 router.post("/logout", AuthController.logOUtUser);
-router.post("/reset-password", AuthController.resetPassword);
+router.post("/reset-password", auth(), AuthController.resetPassword);
 router.post("/forgot-password", AuthController.forgotPassword);
 router.patch("/change-password", auth(), AuthController.changeUserPassword);
 router.post(
