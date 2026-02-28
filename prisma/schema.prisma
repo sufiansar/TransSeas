@@ -128,22 +128,21 @@ model ManufacturerPackage {
 
 model Items {
   id              String @id @default(auto()) @map("_id") @db.ObjectId
-  itemTitle       String?
-  itemcode        String
+  item_name       String?
+  item_code        String
   manufacturer    String?
   description     String?
-  quantity        Float                    
+  qty             String?                    
   unit            Unit @default(PIECE)
-  price           Float?
   remarks         String?                  
-  status          ItemsStatus @default(PENDING)
+  status          String? // ItemsStatus @default(PENDING)
   rfqId           String? @db.ObjectId
   rfq             RFQ? @relation(fields: [rfqId], references: [id], onDelete: SetNull)
   projectId       String @db.ObjectId
   project         Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   quatationsItems QuotationItem[]
-  commodityId String @db.ObjectId
-  commodity   Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
+  commodityId     String @db.ObjectId
+  commodity       Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -188,8 +187,7 @@ model RFQ {
   rfqStatus     rfqStatus  @default(SENT)
   commodityId   String?    @db.ObjectId
   commodity     Commodity? @relation(fields: [commodityId], references: [id])
-  quatationId   String?    @db.ObjectId
-  quotation     Quotation? @relation(fields: [quatationId], references: [id], onDelete: SetNull)
+  quotations    Quotation[] 
   emailMessage  String?
   followUpEmail String?
   createdAt     DateTime   @default(now())
@@ -208,11 +206,15 @@ model Quotation {
   sourceFile    String?   
   fileType      FileType?
   status        QuotationStatus @default(PARSED)
-  rfq           RFQ[]
+  rfqId         String?  @db.ObjectId 
+  rfq           RFQ?     @relation(fields: [rfqId], references: [id])
   quotationItems QuotationItem[]
   projectId     String   @db.ObjectId
   project       Project  @relation(fields: [projectId], references: [id])
-  // items         Items[]
+  validUntil    DateTime?
+  totalAmount   Float?
+  paymentTerms   String?
+  deliveryTerms  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   @@map("quotations")
@@ -226,6 +228,8 @@ model QuotationItem {
   item         Items    @relation(fields: [itemId], references: [id], onDelete: Cascade)
   quantity     Float
   unitPrice    Float
+  remarks      String?
+  total        Float?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   @@map("quatationItems")
@@ -250,7 +254,6 @@ enum FileType {
 
 enum QuotationStatus {
   NEEDS_REVIEW
-  RECEIVED
   APPROVED
   PARSED
 }
@@ -382,12 +385,13 @@ enum UserStatus {
   DELETED
 }
 
-enum ItemsStatus {
-  PENDING
-  APPROVED
-  EIDITED
-  LOCKED
-}
+// enum ItemStatus {
+//   APPROVED
+//   PARSED
+//   EIDITED
+//   NEEDS_REVIEW
+//   LOCKED
+// }
 
 enum Unit {
   PIECE // pcs

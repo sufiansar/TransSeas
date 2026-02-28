@@ -148,6 +148,41 @@ const getRFQBYProjectId = async (projectId: string) => {
 
   return { items, vendors };
 };
+
+export const sendFollowUpToVendor = async (rfqId: string, vendorId: string) => {
+  const rfq = await prisma.rFQ.findUnique({
+    where: { id: rfqId },
+    include: {
+      vendors: {
+        select: { id: true, email: true, name: true, companyName: true },
+      },
+      project: { select: { referenceNo: true } },
+      items: { select: { id: true } },
+    },
+  });
+
+  if (!rfq) throw new Error("RFQ not found");
+  if (!rfq.followUpEmail) throw new Error("Follow-up email not found");
+
+  const vendor = rfq.vendors.find((v) => v.id === vendorId);
+  if (!vendor) throw new Error("Vendor not found in this RFQ");
+
+  const followUpSubject = `${rfq.emailSubject} - Follow Up`;
+
+  await addRFQMailJob(
+    vendor.email,
+    vendor.companyName || vendor.name || "Valued Vendor",
+    rfq.project?.referenceNo || "N/A",
+    rfq.rfqNo,
+    followUpSubject,
+    rfq.followUpEmail,
+    rfq.terms as string,
+    rfq.items.map((item) => item.id),
+  );
+
+  return { message: `Follow-up email sent to ${vendor.name}` };
+};
+
 const getAllRFQs = async (query: any) => {
   const prismaQuery = new PrismaQueryBuilder(query);
   const builtQuery = prismaQuery
@@ -161,7 +196,7 @@ const getAllRFQs = async (query: any) => {
     ...builtQuery,
     include: {
       vendors: { select: { id: true, name: true, companyName: true } },
-      items: { select: { id: true, itemTitle: true } },
+      items: true,
       project: { select: { name: true } },
     },
   });
@@ -173,7 +208,7 @@ const getRFQById = async (rfqId: string) => {
     where: { id: rfqId },
     include: {
       vendors: { select: { id: true, name: true, companyName: true } },
-      items: { select: { id: true, itemTitle: true } },
+      items: true,
       project: { select: { name: true } },
     },
   });

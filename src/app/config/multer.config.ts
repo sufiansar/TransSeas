@@ -68,3 +68,24 @@ export const multerUpload = multer({
     fileSize: 10 * 1024 * 1024, // 10 MB
   },
 });
+
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    const allowedMimeTypes = [
+      "application/pdf",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ];
+
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+      return;
+    }
+
+    cb(null, false);
+  },
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+});

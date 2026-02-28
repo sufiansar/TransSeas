@@ -3,16 +3,55 @@ import { catchAsync } from "../../utility/catchAsync";
 import { ItemsService } from "./items.service";
 import { sendResponse } from "../../utility/sendResponse";
 import httpStatus from "http-status-codes";
+import AppError from "../../errorHelpers/AppError";
 
-const createItem = catchAsync(
+const uploadPdfAndExcelFiles = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const payload = req.body;
-    const { projectId } = req.params;
-    const result = await ItemsService.createItem(payload, projectId as string);
+    const files = req.files as
+      | {
+          [fieldname: string]: Express.Multer.File[];
+        }
+      | undefined;
+
+    const excelFile = files?.excel_file?.[0];
+    const pdfFile = files?.pdf_file?.[0];
+
+    const { projectId } = req.body;
+
+    const result = await ItemsService.uploadPdfAndExcelFiles(
+      excelFile,
+      pdfFile,
+      projectId,
+    );
+
     sendResponse(res, {
-      statusCode: httpStatus.CREATED,
+      statusCode: httpStatus.OK,
       success: true,
-      message: "Item created successfully",
+      message: "Files uploaded and processed successfully",
+      data: result,
+    });
+  },
+);
+const getUploadBatchItems = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { batchId } = req.params;
+    const { projectId } = req.query;
+
+    // if (!projectId || typeof projectId !== "string") {
+    //   return next(
+    //     new AppError(httpStatus.BAD_REQUEST, "Project ID is required"),
+    //   );
+    // }
+
+    const result = await ItemsService.getUploadBatchItems(
+      batchId as string,
+      projectId as string,
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Batch items retrieved successfully",
       data: result,
     });
   },
@@ -75,7 +114,8 @@ const deleteItem = catchAsync(
   },
 );
 export const ItemsController = {
-  createItem,
+  uploadPdfAndExcelFiles,
+  getUploadBatchItems,
   getAllItems,
   getItemById,
   updateItem,

@@ -6,8 +6,11 @@ import { JwtPayload } from "jsonwebtoken";
 import AppError from "../../errorHelpers/AppError";
 import HttpStatus from "http-status";
 import { PrismaQueryBuilder } from "../../utility/queryBuilder";
+import { processQuotationItemsWithAI } from "./ai.service";
 
 const createQuotation = async (data: CreateQuotationDto) => {
+  const processedItems = await processQuotationItemsWithAI(data.items);
+
   return prisma.$transaction(async (tx) => {
     const project = await tx.project.findUnique({
       where: { id: data.projectId },
@@ -32,7 +35,23 @@ const createQuotation = async (data: CreateQuotationDto) => {
       data: {
         number: quotationNumber,
         projectId: project.id,
+        vendorId: data.vendorId,
+        validUntil: data.validUntil,
+        totalAmount: data.totalAmount,
+        deliveryTerms: data.deliveryTerms,
+        paymentTerms: data.paymentTerms,
       },
+    });
+
+    const quotationItemsData = processedItems.map((item: any) => ({
+      quotationId: quotation.id,
+      itemId: item.itemId,
+      unitPrice: item.unitPrice,
+      quantity: item.quantity,
+    }));
+
+    await tx.quotationItem.createMany({
+      data: quotationItemsData,
     });
 
     return quotation;
@@ -173,9 +192,75 @@ const compareQuotations = async (projectId: string) => {
   return comparison;
 };
 
+const getQuotationById = async (quotationId: string, user: JwtPayload) => {
+  if (!user || !user.id) {
+    throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+  if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
+    throw new AppError(
+      HttpStatus.FORBIDDEN,
+      "You are not authorized to view this quotation",
+    );
+  }
+  const quotation = await prisma.quotation.findUnique({
+    where: { id: quotationId },
+    include: {
+      project: {
+        include: {
+          items: { select: { id: true, itemTitle: true, quantity: true } },
+          vendor: { select: { id: true, name: true, companyName: true } },
+        },
+      },
+      quotationItems: {
+        include: {
+          item: {
+            select: {
+              itemTitle: true,
+              quantity: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!quotation) {
+    throw new AppError(HttpStatus.NOT_FOUND, "Quotation not found");
+  }
+
+  return quotation;
+};
+
+const deleteQuotation = async (quotationId: string, user: JwtPayload) => {
+  if (!user || !user.id) {
+    throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
+    throw new AppError(
+      HttpStatus.FORBIDDEN,
+      "You are not authorized to delete this quotation",
+    );
+  }
+
+  const quotation = await prisma.quotation.findUnique({
+    where: { id: quotationId },
+  });
+
+  if (!quotation) {
+    throw new AppError(HttpStatus.NOT_FOUND, "Quotation not found");
+  }
+
+  await prisma.quotation.delete({
+    where: { id: quotationId },
+  });
+};
+
 export const QuotationService = {
   createQuotation,
   getAllQuotations,
   quotationStatusUpdate,
   compareQuotations,
+  getQuotationById,
+  deleteQuotation,
 };

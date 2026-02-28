@@ -32,7 +32,40 @@ const getAllQuotations = catchAsync(
   },
 );
 
+const updateQuotationStatus = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { quotationId, status } = req.body;
+    const user = req.user;
+    const updatedQuotation = await QuotationService.quotationStatusUpdate(
+      quotationId,
+      status,
+      user,
+    );
+    sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: "Quotation status updated successfully",
+      data: updatedQuotation,
+    });
+  },
+);
+
+const deleteQuotation = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { quotationId } = req.params;
+    const user = req.user;
+    await QuotationService.deleteQuotation(quotationId as string, user);
+    sendResponse(res, {
+      statusCode: HttpStatus.NO_CONTENT,
+      success: true,
+      message: "Quotation deleted successfully",
+      data: null,
+    });
+  },
+);
 export const QuotesController = {
   createQuotation,
   getAllQuotations,
+  updateQuotationStatus,
+  deleteQuotation,
 };

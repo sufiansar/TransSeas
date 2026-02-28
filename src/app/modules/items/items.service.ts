@@ -1,66 +1,123 @@
 import { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../../config/prisma";
 import AppError from "../../errorHelpers/AppError";
-import { CreateItemDTO } from "./items.interface";
+
 import HttpStatus from "http-status";
 import { UserRole } from "@prisma/client";
 import { PrismaQueryBuilder } from "../../utility/queryBuilder";
 import { ItemsFilterableFields, ItemsSearchableFields } from "./items.constant";
+import axios from "axios";
+import FormData from "form-data";
 
-export const createItem = async (payload: CreateItemDTO, projectId: string) => {
-  if (payload.quantity <= 0) {
+const uploadPdfAndExcelFiles = async (
+  excelFile?: Express.Multer.File,
+  pdfFile?: Express.Multer.File,
+  projectId?: string,
+) => {
+  if (!excelFile && !pdfFile) {
     throw new AppError(
       HttpStatus.BAD_REQUEST,
-      "Quantity must be greater than zero",
+      "At least one file is required: excel_file or pdf_file",
     );
   }
 
-  if (payload.rfqId) {
-    const rfq = await prisma.rFQ.findUnique({
-      where: { id: payload.rfqId },
+  if (!projectId) {
+    throw new AppError(HttpStatus.BAD_REQUEST, "Project ID is required");
+  }
+
+  const formData = new FormData();
+
+  if (excelFile) {
+    formData.append("excel_file", excelFile.buffer, {
+      filename: excelFile.originalname,
+      contentType: excelFile.mimetype,
     });
-    if (!rfq) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Invalid RFQ ID");
+  }
+
+  if (pdfFile) {
+    formData.append("pdf_file", pdfFile.buffer, {
+      filename: pdfFile.originalname,
+      contentType: pdfFile.mimetype,
+    });
+  }
+
+  formData.append("projectId", projectId);
+
+  const uploadApiUrl =
+    process.env.PROCUREMENT_UPLOAD_API_URL ||
+    "http://206.162.244.134:8073/api/upload/";
+
+  try {
+    const response = await axios.post(uploadApiUrl, formData, {
+      headers: formData.getHeaders(),
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+    });
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const externalMessage =
+        (error.response?.data as { detail?: string })?.detail ||
+        error.response?.statusText ||
+        error.message;
+
+      throw new AppError(
+        HttpStatus.BAD_GATEWAY,
+        `Upload service failed: ${externalMessage}`,
+      );
     }
+
+    throw new AppError(HttpStatus.BAD_GATEWAY, "Upload service failed");
+  }
+};
+
+const getUploadBatchItems = async (batchId: string, projectId: string) => {
+  if (!batchId) {
+    throw new AppError(HttpStatus.BAD_REQUEST, "Batch ID is required");
   }
 
-  return prisma.$transaction(async (tx) => {
-    const item = await tx.items.create({
-      data: {
-        itemTitle: payload.itemTitle,
-        quantity: payload.quantity,
-        manufacturer: payload.manufacturer,
-        itemcode: payload.itemcode,
-        description: payload.description || null,
-        unit: payload.unit,
-        status: payload.status,
-        projectId: payload.projectId,
-        remarks: payload.remarks || null,
-        commodityId: payload.commodityId as string,
+  // if (!projectId) {
+  //   throw new AppError(HttpStatus.BAD_REQUEST, "Project ID is required");
+  // }
+
+  const uploadApiBaseUrl =
+    process.env.PROCUREMENT_UPLOAD_API_URL ||
+    "http://206.162.244.134:8073/api/upload/";
+
+  const normalizedBaseUrl = uploadApiBaseUrl.endsWith("/")
+    ? uploadApiBaseUrl
+    : `${uploadApiBaseUrl}/`;
+
+  // Add projectId as query param
+  const batchUrl = `${normalizedBaseUrl}batch/${encodeURIComponent(batchId)}?projectId=${encodeURIComponent(projectId)}`;
+
+  try {
+    const response = await axios.get(batchUrl, {
+      headers: {
+        accept: "application/json",
       },
     });
 
-    //Recalculate total project price INLINE
-    const items = await tx.items.findMany({
-      where: { projectId: payload.projectId },
-      select: {
-        quantity: true,
-        price: true,
-      },
-    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const externalMessage =
+        (error.response?.data as { detail?: string; message?: string })
+          ?.detail ||
+        (error.response?.data as { detail?: string; message?: string })
+          ?.message ||
+        error.response?.statusText ||
+        error.message;
 
-    const totalPrice = items.reduce(
-      (sum, item) => sum + (item.price || 0) * item.quantity,
-      0,
-    );
+      throw new AppError(
+        HttpStatus.BAD_GATEWAY,
+        `Upload batch fetch failed: ${externalMessage}`,
+      );
+    }
 
-    await tx.project.update({
-      where: { id: payload.projectId },
-      data: { totalPrice: totalPrice },
-    });
-
-    return item;
-  });
+    throw new AppError(HttpStatus.BAD_GATEWAY, "Upload batch fetch failed");
+  }
 };
 
 const getAllItems = async (query: Record<string, any>, user: JwtPayload) => {
@@ -73,6 +130,48 @@ const getAllItems = async (query: Record<string, any>, user: JwtPayload) => {
       HttpStatus.FORBIDDEN,
       "Only ADMIN and SUPER_ADMIN can access items",
     );
+  }
+
+  if (query.batch_id) {
+    const procurementItemsApiUrl =
+      process.env.PROCUREMENT_ITEMS_API_URL ||
+      "http://206.162.244.134:8073/api/items/";
+
+    try {
+      const response = await axios.get(procurementItemsApiUrl, {
+        headers: {
+          accept: "application/json",
+        },
+        params: {
+          status: query.status,
+          batch_id: query.batch_id,
+          page: query.page,
+          limit: query.limit,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const externalMessage =
+          (error.response?.data as { detail?: string; message?: string })
+            ?.detail ||
+          (error.response?.data as { detail?: string; message?: string })
+            ?.message ||
+          error.response?.statusText ||
+          error.message;
+
+        throw new AppError(
+          HttpStatus.BAD_GATEWAY,
+          `Procurement items fetch failed: ${externalMessage}`,
+        );
+      }
+
+      throw new AppError(
+        HttpStatus.BAD_GATEWAY,
+        "Procurement items fetch failed",
+      );
+    }
   }
 
   const queryBuilder = new PrismaQueryBuilder(query);
@@ -164,7 +263,8 @@ const deleteItems = async (id: string, user: JwtPayload) => {
   return existingItem;
 };
 export const ItemsService = {
-  createItem,
+  uploadPdfAndExcelFiles,
+  getUploadBatchItems,
   getAllItems,
   getItemById,
   updateItems,
