@@ -1,30 +1,26 @@
-import { ItemsStatus, Unit } from "@prisma/client";
-import z from "zod";
+import { Unit } from "@prisma/client";
+import { z } from "zod";
+import { ItemStatus } from "./items.interface";
 
 export const CreateItemsSchema = z
   .object({
-    itemTitle: z.string().min(1, "Item title is required").optional(),
+    item_name: z.string().min(1, "Item name is required").optional(),
 
-    quantity: z
-      .number({ message: "Quantity must be a number" })
-      .int("Quantity must be an integer")
-      .positive("Quantity must be greater than 0"),
+    item_code: z.string().min(1, "Item code is required"),
 
-    remarks: z.string().optional(),
-    commodityId: z.string().optional().nullable(),
     manufacturer: z
       .string()
       .min(1, "Manufacturer name cannot be empty")
       .optional(),
 
-    itemcode: z.string().min(1, "Item code is required"),
-
     description: z.string().min(1, "Description cannot be empty").optional(),
 
-    price: z
-      .number({ message: "Price must be a number" })
-      .nonnegative("Price cannot be negative")
-      .optional(),
+    qty: z
+      .string()
+      .optional()
+      .refine((val) => !val || /^\d+$/.test(val), {
+        message: "Quantity must be a valid number",
+      }),
 
     unit: z
       .nativeEnum(Unit, {
@@ -32,59 +28,62 @@ export const CreateItemsSchema = z
       })
       .optional(),
 
+    price: z
+      .number({ message: "Price must be a number" })
+      .nonnegative("Price cannot be negative")
+      .optional(),
+
+    remarks: z.string().optional(),
+
     status: z
-      .nativeEnum(ItemsStatus, {
-        message: "Invalid item status",
-      })
+      .nativeEnum(ItemStatus, { message: "Invalid item status" })
       .optional(),
 
     rfqId: z.string().optional().nullable(),
 
     projectId: z.string().min(1, "Project ID is required"),
+
+    commodityId: z.string().min(1, "Commodity ID is required"),
   })
   .strict();
 
 export const UpdateItemsSchema = z
   .object({
-    itemTitle: z.string().min(1, "Item title cannot be empty").optional(),
+    item_name: z.string().min(1, "Item name cannot be empty").optional(),
 
-    quantity: z
-      .number({ message: "Quantity must be a number" })
-      .int("Quantity must be an integer")
-      .positive("Quantity must be greater than 0")
-      .optional(),
+    item_code: z.string().min(1, "Item code cannot be empty").optional(),
 
     manufacturer: z
       .string()
       .min(1, "Manufacturer name cannot be empty")
       .optional(),
-    remarks: z.string().optional(),
-
-    commodityId: z.string().optional().nullable(),
-
-    itemcode: z.string().min(1, "Item code cannot be empty").optional(),
 
     description: z.string().min(1, "Description cannot be empty").optional(),
+
+    qty: z
+      .string()
+      .optional()
+      .refine((val) => !val || /^\d+$/.test(val), {
+        message: "Quantity must be a valid number",
+      }),
+
+    unit: z.nativeEnum(Unit, { message: "Invalid unit value" }).optional(),
 
     price: z
       .number({ message: "Price must be a number" })
       .nonnegative("Price cannot be negative")
       .optional(),
 
-    unit: z
-      .nativeEnum(Unit, {
-        message: "Invalid unit value",
-      })
-      .optional(),
+    remarks: z.string().optional(),
 
     status: z
-      .nativeEnum(ItemsStatus, {
-        message: "Invalid item status",
-      })
+      .nativeEnum(ItemStatus, { message: "Invalid item status" })
       .optional(),
 
     rfqId: z.string().nullable().optional(),
 
     projectId: z.string().min(1, "Project ID is required").optional(),
+
+    commodityId: z.string().min(1, "Commodity ID is required").optional(),
   })
   .strict();

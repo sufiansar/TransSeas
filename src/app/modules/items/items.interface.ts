@@ -1,16 +1,30 @@
-import { ItemsStatus, Unit } from "@prisma/client";
+import { Unit } from "@prisma/client";
 
-export interface CreateItemDTO {
-  itemTitle?: string;
-  quantity: number;
+export enum ItemStatus {
+  PARSED = "Parsed",
+  NEEDS_REVIEW = "Needs Review",
+  LOCKED = "Locked",
+  APPROVED = "Approved",
+}
+
+export interface Item {
+  id: string;
+  item_name?: string;
+  item_code: string;
   manufacturer?: string;
-  itemcode: string;
-  commodityId?: string;
   description?: string;
+  qty?: string;
+  unit: Unit;
   price?: number;
-  unit?: Unit;
   remarks?: string;
-  status?: ItemsStatus;
-  rfqId?: string | null;
+  status?: ItemStatus;
+  rfqId?: string;
+  rfq?: any;
   projectId: string;
+  project?: any;
+  quatationsItems?: any[];
+  commodityId: string;
+  commodity?: any;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
