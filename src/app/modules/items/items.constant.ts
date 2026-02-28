@@ -8,7 +8,7 @@ export const ItemsSearchableFields = [
 export const ItemsFilterableFields = [
   "status",
   "projectId",
-  "commodityId",
+  "commodity",
   "createdAt",
   "updatedAt",
   "searchTerm",

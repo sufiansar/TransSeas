@@ -41,7 +41,7 @@ export const CreateItemsSchema = z
 
     rfqId: z.string().optional().nullable(),
 
-    projectId: z.string().min(1, "Project ID is required"),
+    project_id: z.string().min(1, "Project ID is required"),
 
     commodityId: z.string().min(1, "Commodity ID is required"),
   })
@@ -82,8 +82,14 @@ export const UpdateItemsSchema = z
 
     rfqId: z.string().nullable().optional(),
 
-    projectId: z.string().min(1, "Project ID is required").optional(),
+    project_id: z.string().min(1, "Project ID is required").optional(),
 
     commodityId: z.string().min(1, "Commodity ID is required").optional(),
+  })
+  .strict();
+
+export const UploadItemsSchema = z
+  .object({
+    project_id: z.string().trim().min(1, "Project ID is required"),
   })
   .strict();
