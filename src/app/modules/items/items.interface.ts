@@ -20,7 +20,7 @@ export interface Item {
   status?: ItemStatus;
   rfqId?: string;
   rfq?: any;
-  projectId: string;
+  project_id: string;
   project?: any;
   quatationsItems?: any[];
   commodityId: string;

@@ -16,12 +16,18 @@ const uploadPdfAndExcelFiles = catchAsync(
     const excelFile = files?.excel_file?.[0];
     const pdfFile = files?.pdf_file?.[0];
 
-    const { projectId } = req.body;
+    const project_id = String(req.body?.project_id ?? "").trim();
+
+    if (!project_id) {
+      return next(
+        new AppError(httpStatus.BAD_REQUEST, "Project ID is required"),
+      );
+    }
 
     const result = await ItemsService.uploadPdfAndExcelFiles(
       excelFile,
       pdfFile,
-      projectId,
+      project_id,
     );
 
     sendResponse(res, {
@@ -35,7 +41,7 @@ const uploadPdfAndExcelFiles = catchAsync(
 const getUploadBatchItems = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { batchId } = req.params;
-    const { projectId } = req.query;
+    const { project_id } = req.query;
 
     // if (!projectId || typeof projectId !== "string") {
     //   return next(
@@ -45,7 +51,7 @@ const getUploadBatchItems = catchAsync(
 
     const result = await ItemsService.getUploadBatchItems(
       batchId as string,
-      projectId as string,
+      project_id as string,
     );
 
     sendResponse(res, {
@@ -113,6 +119,77 @@ const deleteItem = catchAsync(
     });
   },
 );
+
+const getItemStatsSummary = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const result = await ItemsService.getItemStatsSummary(user);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Item stats summary retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+const updateItemStatus = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { itemId } = req.params;
+    const payload = req.body;
+    const user = req.user;
+
+    const result = await ItemsService.updateItemStatus(
+      itemId as string,
+      payload,
+      user,
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Item status updated successfully",
+      data: result,
+    });
+  },
+);
+
+const bulkUpdateItemStatus = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { batch_id: batchId } = req.query;
+    const payload = req.body;
+    const user = req.user;
+
+    const result = await ItemsService.bulkUpdateItemStatus(
+      batchId as string,
+      payload,
+      user,
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Bulk item status updated successfully",
+      data: result,
+    });
+  },
+);
+
+const getNeedsReviewItems = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const result = await ItemsService.getNeedsReviewItems(user);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Needs review items retrieved successfully",
+      data: result,
+    });
+  },
+);
+
 export const ItemsController = {
   uploadPdfAndExcelFiles,
   getUploadBatchItems,
@@ -120,4 +197,8 @@ export const ItemsController = {
   getItemById,
   updateItem,
   deleteItem,
+  getItemStatsSummary,
+  updateItemStatus,
+  bulkUpdateItemStatus,
+  getNeedsReviewItems,
 };
