@@ -135,12 +135,7 @@ const quotationStatusUpdate = async (
 };
 
 const compareQuotations = async (projectId: string) => {
-  //Get all project items
-  const projectItems = await prisma.items.findMany({
-    where: { project_id: projectId },
-  });
-
-  // Get all approved quotations
+  // Get Approved Quotations with Items
   const quotations = await prisma.quotation.findMany({
     where: {
       projectId,
@@ -157,35 +152,57 @@ const compareQuotations = async (projectId: string) => {
     },
   });
 
-  //Build comparison structure
-  const comparison = projectItems.map((item) => {
-    const vendorPrices = quotations.map((quote) => {
-      const matchedItem = quote.quotationItems.find(
-        (qi) => qi.itemId === item.id,
+  if (!quotations.length) {
+    return [];
+  }
+
+  // 2️⃣ Collect ALL unique items across all vendors
+  const itemMap = new Map<string, any>();
+
+  quotations.forEach((quote) => {
+    quote.quotationItems.forEach((item) => {
+      if (!itemMap.has(item.itemId)) {
+        itemMap.set(item.itemId, {
+          itemId: item.itemId,
+          itemName: item.item_name,
+          itemCode: item.item_code,
+          description: item.description,
+        });
+      }
+    });
+  });
+
+  const allItems = Array.from(itemMap.values());
+
+  // 3️⃣ Build comparison
+  const comparison = allItems.map((item) => {
+    const vendorData = quotations.map((quote) => {
+      const matched = quote.quotationItems.find(
+        (qi) => qi.itemId === item.itemId,
       );
 
-      if (!matchedItem) {
+      if (!matched) {
         return {
-          vendorId: quote?.vendor?.id,
-          vendorName: quote?.vendor?.companyName,
+          vendorId: quote.vendor?.id,
+          vendorName: quote.vendor?.companyName,
           status: "MISSING",
         };
       }
 
       return {
-        vendorId: quote?.vendor?.id,
-        vendorName: quote?.vendor?.companyName,
-        unitPrice: matchedItem.unitPrice,
-        quantity: matchedItem.quantity,
-        total: matchedItem.unitPrice * matchedItem.quantity,
+        vendorId: quote.vendor?.id,
+        vendorName: quote.vendor?.companyName,
+        unitPrice: matched.unitPrice,
+        quantity: matched.qty,
+        subtotal: matched.subtotalPrice,
+        total: matched.totalPrice,
+        remarks: matched.remarks,
       };
     });
 
     return {
-      itemId: item.id,
-      itemTitle: item.item_name,
-      quantity: item.qty,
-      vendors: vendorPrices,
+      ...item,
+      vendors: vendorData,
     };
   });
 

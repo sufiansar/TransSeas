@@ -41,6 +41,7 @@ const createRFQDto = async (data: IRFQ) => {
         dueDate: data.dueDate,
         terms: data.terms,
         projectName: project.name,
+        referenceNo: project.referenceNo,
       });
 
       const emailSubject = data.emailSubject || subject;

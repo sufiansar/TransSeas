@@ -10,6 +10,7 @@ interface RFQEmailPayload {
   dueDate: Date;
   email?: string[];
   projectName?: string;
+  referenceNo?: string;
   terms?: string;
 }
 
@@ -55,6 +56,7 @@ export const generateRFQEmail = ({
   email,
   dueDate,
   projectName,
+  referenceNo,
   terms,
 }: RFQEmailPayload) => {
   const formattedDate = dueDate.toLocaleDateString("en-GB", {
@@ -84,6 +86,7 @@ TransSeas is pleased to invite your company to submit a quotation for the follow
 
 RFQ Number: ${rfqNo}
 Project: ${projectName || "N/A"}
+Reference No: ${referenceNo || "N/A"}
 Submission Deadline: ${formattedDate}
 
 ${termsBlock}
