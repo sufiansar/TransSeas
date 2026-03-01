@@ -62,9 +62,9 @@ const getAllProjects = async (query: Record<string, any>) => {
         items: {
           select: {
             id: true,
-            itemTitle: true,
-            quantity: true,
-            price: true,
+            item_name: true,
+            commodity: true,
+            qty: true,
             unit: true,
           },
         },
@@ -85,7 +85,6 @@ const getAllProjects = async (query: Record<string, any>) => {
         commodity: {
           include: {
             vendors: { select: { id: true, name: true, companyName: true } },
-            items: { select: { id: true, itemTitle: true } },
           },
         },
         quotations: {
@@ -113,9 +112,8 @@ const getProjectById = async (id: string) => {
       items: {
         select: {
           id: true,
-          itemTitle: true,
-          quantity: true,
-          price: true,
+          item_name: true,
+          qty: true,
           unit: true,
         },
       },

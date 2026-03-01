@@ -1,3 +1,9 @@
+export const rfqEmailTemplate = (data: {
+  emailSubject: string;
+  emailBody: string;
+  companyName?: string;
+  rfqNo?: string;
+}) => `
 <!DOCTYPE html>
 <html>
   <head>
@@ -26,25 +32,13 @@
   </head>
   <body>
     <div class="container">
-      <!-- ✅ Auto-generated subject shown in email (optional but professional) -->
       <h2>Request For Quotation</h2>
-      <div class="subject"><strong>Subject:</strong> <%= emailSubject %></div>
+      <div class="subject"><strong>Subject:</strong> ${data.emailSubject}</div>
 
-      <!-- ✅ Auto-generated RFQ Number -->
-      <!-- <p><strong>RFQ Number:</strong> <%= rfqNo %></p> -->
-
-      <!-- ✅ Company name -->
-      <!-- <p>Dear <strong><%= companyName %></strong>,</p> -->
-
-      <!-- ✅ Auto-generated body -->
       <div style="line-height: 1.6; white-space: pre-line">
-        <%= emailBody %>
+        ${data.emailBody}
       </div>
-
-      <!-- <p style="margin-top: 30px">
-        Kind regards,<br />
-        <strong>TransSeas Procurement Team</strong>
-      </p> -->
     </div>
   </body>
 </html>
+`;

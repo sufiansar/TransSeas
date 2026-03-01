@@ -6,8 +6,15 @@ import { prisma } from "../../config/prisma";
 import { generateRFQPdf } from "../../utility/generateRFQPdf";
 import { generateRFQExcel } from "../../utility/generateRFQExcel";
 import fs from "fs/promises";
+import { existsSync } from "fs";
+import fsPromises from "fs/promises";
 import AppError from "../../errorHelpers/AppError";
 import HttpStatus from "http-status";
+import { rfqEmailTemplate } from "../../utility/templates/rfqEmailTemplate";
+import { inviteEmailTemplate } from "../../utility/templates/inviteEmailTemplate";
+import { resetPasswordEmailTemplate } from "../../utility/templates/resetPasswordEmailTemplate";
+import { otpEmailTemplate } from "../../utility/templates/otpEmailTemplate";
+
 /* -----------------------------
    Job payload types
 ----------------------------- */
@@ -37,13 +44,13 @@ export const mailWorker = new Worker(
   "mail-queue",
   async (job: Job<MailJobData>) => {
     switch (job.name) {
-      case "verifyParentOtp":
-        await sendOtpEmail(job.data as { email: string; otp: string });
-        break;
+      // case "verifyParentOtp":
+      //   await sendOtpEmail(job.data as { email: string; otp: string });
+      //   break;
 
-      case "resendParentOtp":
-        await resendOtpEmail(job.data as { email: string });
-        break;
+      // case "resendParentOtp":
+      //   await resendOtpEmail(job.data as { email: string });
+      //   break;
 
       case "sendRFQ":
         await handleRFQEmail(
@@ -60,31 +67,31 @@ export const mailWorker = new Worker(
         );
         break;
 
-      case "requestPasswordReset":
-        await sendResetEmail(job.data as { email: string; token: string });
-        break;
-      case "forgotPassword":
-        await handleForgotPassword(
-          job.data as {
-            email: string;
-            name: string;
-            resetUILink: string;
-          },
-        );
-        break;
-      case "sendInviteUser":
-        await handleInviteUserEmail(
-          job.data as {
-            email: string;
-            inviteLink: string;
-            role: string;
-          },
-        );
-        break;
+      // case "requestPasswordReset":
+      //   await sendResetEmail(job.data as { email: string; token: string });
+      //   break;
+      // case "forgotPassword":
+      //   await handleForgotPassword(
+      //     job.data as {
+      //       email: string;
+      //       name: string;
+      //       resetUILink: string;
+      //     },
+      //   );
+      //   break;
+      // case "sendInviteUser":
+      //   await handleInviteUserEmail(
+      //     job.data as {
+      //       email: string;
+      //       inviteLink: string;
+      //       role: string;
+      //     },
+      //   );
+      //   break;
 
-      case "resendTwoFactorOTP":
-        await resendOtpEmail(job.data as { email: string });
-        break;
+      // case "resendTwoFactorOTP":
+      //   await resendOtpEmail(job.data as { email: string });
+      //   break;
 
       default:
         throw new Error(`Unknown job type: ${job.name}`);
@@ -100,39 +107,41 @@ export const mailWorker = new Worker(
    Email handlers
 ----------------------------- */
 
-async function handleForgotPassword(data: {
+export async function handleForgotPassword(data: {
   email: string;
   name: string;
   resetUILink: string;
 }) {
+  // Generate HTML from the TS template
+  const htmlContent = resetPasswordEmailTemplate({
+    name: data.name,
+    resetUILink: data.resetUILink,
+  });
+
+  // Send email directly
   await sendEmail({
     to: data.email,
-    subject: "Forget Password",
-    templateName: "forgetPassword",
-    templateData: {
-      name: data.name,
-      resetUILink: data.resetUILink,
-    },
+    subject: "Reset Your Password",
+    html: htmlContent,
   });
 }
 
-async function handleInviteUserEmail(data: {
+export async function handleInviteUserEmail(data: {
   email: string;
   inviteLink: string;
-  role: string;
+  role?: string;
 }) {
+  const htmlContent = inviteEmailTemplate({
+    inviteLink: data.inviteLink,
+  });
+
   await sendEmail({
     to: data.email,
     subject: "You're invited to join TransSeas",
-    templateName: "invite-user",
-    templateData: {
-      inviteLink: data.inviteLink,
-      role: data.role,
-    },
+    html: htmlContent,
   });
 }
-
-async function sendOtpEmail({
+export async function sendOtpEmail({
   email,
   name,
   otp,
@@ -143,57 +152,136 @@ async function sendOtpEmail({
 }) {
   const expiryMinutes = Math.floor(OTP_EXPIRATION / 60);
 
+  // Generate HTML from TS template
+  const htmlContent = otpEmailTemplate({
+    name: name || "there",
+    otp,
+    expiry: expiryMinutes,
+  });
+
+  // Send email directly
   await sendEmail({
     to: email,
     subject: "Your OTP Code",
-    templateName: "otp",
-    templateData: {
-      name: name || "there",
-      otp,
-      expiry: expiryMinutes,
-    },
+    html: htmlContent,
   });
 }
 
-async function resendOtpEmail({ email }: { email: string }) {
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+// async function resendOtpEmail({ email }: { email: string }) {
+//   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  await sendEmail({
-    to: email,
-    subject: "Your OTP Code",
-    templateName: "otp",
-    templateData: { otp },
-  });
-}
+//   await sendEmail({
+//     to: email,
+//     subject: "Your OTP Code",
+//     templateName: "otp",
+//     templateData: { otp },
+//   });
+// }
 
-async function sendResetEmail({
-  email,
-  token,
-}: {
-  email: string;
-  token: string;
-}) {
-  await sendEmail({
-    to: email,
-    subject: "Reset Your Password",
-    templateName: "reset-password",
-    templateData: { token },
-  });
-}
+// async function sendResetEmail({
+//   email,
+//   token,
+// }: {
+//   email: string;
+//   token: string;
+// }) {
+//   await sendEmail({
+//     to: email,
+//     subject: "Reset Your Password",
+//     templateName: "reset-password",
+//     templateData: { token },
+//   });
+// }
 
-export async function handleFollowUpEmail(data: {
-  email: string;
-  step: number;
-}) {
-  await sendEmail({
-    to: data.email,
-    subject: `Reminder ${data.step}`,
-    templateName: "follow-up",
-    templateData: {
-      step: data.step,
-    },
-  });
-}
+// export async function handleFollowUpEmail(data: {
+//   email: string;
+//   step: number;
+// }) {
+//   await sendEmail({
+//     to: data.email,
+//     subject: `Reminder ${data.step}`,
+//     templateName: "follow-up",
+//     templateData: {
+//       step: data.step,
+//     },
+//   });
+// }
+// export async function handleRFQEmail(data: {
+//   email: string;
+//   companyName: string;
+//   rfqNo: string;
+//   referenceNo: string;
+//   emailSubject: string;
+//   emailBody: string;
+//   itemIds: string[];
+// }) {
+//   // 1. Fetch RFQ items
+//   const items = await prisma.items.findMany({
+//     where: {
+//       id: { in: data.itemIds },
+//     },
+//   });
+
+//   const project = await prisma.project.findUnique({
+//     where: {
+//       referenceNo: data.referenceNo,
+//     },
+//   });
+
+//   if (!project) {
+//     throw new AppError(HttpStatus.NOT_FOUND, "Project not found");
+//   }
+
+//   // 2. Generate PDF & Excel
+//   const pdfPath = await generateRFQPdf(items, data.rfqNo, data.referenceNo);
+//   const excelPath = await generateRFQExcel(items, data.rfqNo, data.referenceNo);
+
+//   // 3. Read files into buffers
+//   const pdfBuffer = await fs.readFile(pdfPath);
+//   const excelBuffer = await fs.readFile(excelPath);
+
+//   // 4. Send email with attachments
+//   await sendEmail({
+//     to: data.email,
+//     subject: data.emailSubject,
+//     templateName: "rfq",
+//     templateData: {
+//       companyName: data.companyName,
+//       rfqNo: data.rfqNo,
+//       emailSubject: data.emailSubject,
+//       emailBody: data.emailBody,
+//     },
+//     attachments: [
+//       {
+//         filename: `RFQ-${data.rfqNo}.pdf`,
+//         content: pdfBuffer,
+//         contentType: "application/pdf",
+//       },
+//       {
+//         filename: `RFQ-${data.rfqNo}.xlsx`,
+//         content: excelBuffer,
+//         contentType:
+//           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+//       },
+//     ],
+//   });
+
+//   // 5. Cleanup temp files safely ✅
+//   try {
+//     await fsPromises.access(pdfPath);
+//     await fsPromises.unlink(pdfPath);
+//   } catch {
+//     // file does not exist, skip
+//   }
+
+//   try {
+//     await fsPromises.access(excelPath);
+//     await fsPromises.unlink(excelPath);
+//   } catch {
+//     // file does not exist, skip
+//   }
+// }
+
 export async function handleRFQEmail(data: {
   email: string;
   companyName: string;
@@ -203,42 +291,41 @@ export async function handleRFQEmail(data: {
   emailBody: string;
   itemIds: string[];
 }) {
-  // 1. Fetch RFQ items
+  // 1️⃣ Fetch RFQ items
   const items = await prisma.items.findMany({
-    where: {
-      id: { in: data.itemIds },
-    },
+    where: { id: { in: data.itemIds } },
   });
 
+  // 2️⃣ Fetch project
   const project = await prisma.project.findUnique({
-    where: {
-      referenceNo: data.referenceNo,
-    },
+    where: { referenceNo: data.referenceNo },
   });
 
   if (!project) {
     throw new AppError(HttpStatus.NOT_FOUND, "Project not found");
   }
 
-  // 2. Generate PDF & Excel
+  // 3️⃣ Generate PDF & Excel
   const pdfPath = await generateRFQPdf(items, data.rfqNo, data.referenceNo);
   const excelPath = await generateRFQExcel(items, data.rfqNo, data.referenceNo);
 
-  // 3. Read files into buffers
+  // 4️⃣ Read files into buffers
   const pdfBuffer = await fs.readFile(pdfPath);
   const excelBuffer = await fs.readFile(excelPath);
 
-  // 4. Send email with attachments
+  // 5️⃣ Generate email HTML using TS template
+  const htmlContent = rfqEmailTemplate({
+    emailSubject: data.emailSubject,
+    emailBody: data.emailBody,
+    companyName: data.companyName,
+    rfqNo: data.rfqNo,
+  });
+
+  // 6️⃣ Send email with attachments
   await sendEmail({
     to: data.email,
     subject: data.emailSubject,
-    templateName: "rfq",
-    templateData: {
-      companyName: data.companyName,
-      rfqNo: data.rfqNo,
-      emailSubject: data.emailSubject,
-      emailBody: data.emailBody,
-    },
+    html: htmlContent,
     attachments: [
       {
         filename: `RFQ-${data.rfqNo}.pdf`,
@@ -254,9 +341,15 @@ export async function handleRFQEmail(data: {
     ],
   });
 
-  // 5. Cleanup temp files (important ✅)
-  await fs.unlink(pdfPath);
-  await fs.unlink(excelPath);
+  // 7️⃣ Cleanup temp files safely
+  for (const filePath of [pdfPath, excelPath]) {
+    try {
+      await fs.access(filePath);
+      await fs.unlink(filePath);
+    } catch {
+      // file does not exist, skip
+    }
+  }
 }
 /* -----------------------------
    Logs

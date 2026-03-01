@@ -1,3 +1,8 @@
+// resetPasswordEmailTemplate.ts
+export const resetPasswordEmailTemplate = (data: {
+  name: string;
+  resetUILink: string;
+}) => `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -54,14 +59,14 @@
     <div class="container">
       <h2>Reset Your Password</h2>
 
-      <p>Hi <strong><%= name %></strong>,</p>
+      <p>Hi <strong>${data.name}</strong>,</p>
 
       <p>
         You requested to reset your password. Click the button below to create a
         new password.
       </p>
 
-      <a href="<%= resetUILink %>" class="btn"> Reset Password </a>
+      <a href="${data.resetUILink}" class="btn"> Reset Password </a>
 
       <p class="warning">
         This reset link is valid for only <strong>5 minutes</strong>.
@@ -73,3 +78,4 @@
     </div>
   </body>
 </html>
+`;

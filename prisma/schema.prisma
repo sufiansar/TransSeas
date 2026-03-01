@@ -132,6 +132,7 @@ model Items {
   item_code        String
   manufacturer    String?
   description     String?
+  batch_id        String?
   qty             String?                    
   unit            Unit @default(PIECE)
   remarks         String?                  
@@ -139,10 +140,11 @@ model Items {
   rfqId           String? @db.ObjectId
   rfq             RFQ? @relation(fields: [rfqId], references: [id], onDelete: SetNull)
   project_id       String @db.ObjectId
-  project         Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  project         Project? @relation(fields: [project_id], references: [id], onDelete: Cascade)
   quatationsItems QuotationItem[]
-  commodityId     String @db.ObjectId
-  commodity       Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
+  commodity       String?
+  // commodityId     String @db.ObjectId
+  // commodity       Commodity? @relation(fields: [commodityId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -167,7 +169,7 @@ model Commodity {
   rfq     RFQ[]
   vendors User[]
   project Project[]
-  items   Items[]
+  // items   Items[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

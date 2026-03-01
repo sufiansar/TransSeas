@@ -1,3 +1,5 @@
+// inviteEmailTemplate.ts
+export const inviteEmailTemplate = (data: { inviteLink: string }) => `
 <!DOCTYPE html>
 <html>
   <head>
@@ -16,7 +18,7 @@
     </p>
 
     <a
-      href="<%= inviteLink %>"
+      href="${data.inviteLink}"
       style="
         background: #2563eb;
         color: white;
@@ -34,3 +36,4 @@
     <p>If you didn’t expect this invite, ignore this email.</p>
   </body>
 </html>
+`;

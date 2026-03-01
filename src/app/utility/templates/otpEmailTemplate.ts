@@ -1,0 +1,58 @@
+// otpEmailTemplate.ts
+export const otpEmailTemplate = (data: {
+  name: string;
+  otp: string | number;
+  expiry: number;
+}) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Your OTP Code</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f6f6;
+      padding: 20px;
+    }
+    .container {
+      max-width: 480px;
+      background: #fff;
+      margin: auto;
+      padding: 24px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .otp {
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 6px;
+      color: #2d6cdf;
+      margin: 20px 0;
+    }
+    .note {
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Hello ${data.name},</h2>
+
+    <p>Your verification code is:</p>
+
+    <div class="otp">${data.otp}</div>
+
+    <p class="note">
+      This OTP will expire in <strong>${data.expiry} minutes</strong>.
+      Please do not share it with anyone.
+    </p>
+
+    <p class="note">
+      If you didn’t request this, you can safely ignore this email.
+    </p>
+  </div>
+</body>
+</html>
+`;

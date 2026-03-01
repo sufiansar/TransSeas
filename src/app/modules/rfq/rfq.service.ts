@@ -5,84 +5,86 @@ import { generateRFQEmail, generateRFQNumber } from "../../lib/generateEmail";
 import { PrismaQueryBuilder } from "../../utility/queryBuilder";
 import { RfqFilterableFields, RfqSearchableFields } from "./rfq.constant";
 import { IRFQ } from "./rfq.interface";
+import { handleRFQEmail } from "../../bullMQ/workers/mailWorkers";
 
 const createRFQDto = async (data: IRFQ) => {
   if (!data.projectId) throw new Error("Project ID is required");
   if (!data.vendors?.length) throw new Error("At least one vendor is required");
   if (!data.items?.length) throw new Error("At least one item is required");
-  const projectName = await prisma.project.findUnique({
-    where: { id: data.projectId },
-    select: { name: true },
-  });
 
   const project = await prisma.project.findUnique({
     where: { id: data.projectId },
     select: { name: true, referenceNo: true },
   });
-  const result = await prisma.$transaction(async (tx) => {
-    const vendors = await tx.user.findMany({
-      where: {
-        id: { in: data.vendors },
-        role: UserRole.VENDOR,
-        isActive: true,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        companyName: true,
-      },
-    });
-    if (!vendors.length) throw new Error("No valid vendors found");
-    if (vendors.length !== data.vendors.length) {
-      throw new Error("Some selected users are not vendors");
-    }
+  if (!project) throw new Error("Project not found");
 
-    const rfqNo = await generateRFQNumber(tx);
-    const { subject, body } = generateRFQEmail({
-      rfqNo,
-      dueDate: data.dueDate,
-      terms: data.terms,
-      projectName: projectName?.name,
-    });
-    const emailSubject = data.emailSubject || subject;
-    const emailMessage = data.emailMessage || body;
-    const rfq = await tx.rFQ.create({
-      data: {
-        projectId: data.projectId,
-        dueDate: data.dueDate,
+  // 1️⃣ Only DB operations inside transaction
+  const { rfq, vendors, rfqNo, emailSubject, emailMessage } =
+    await prisma.$transaction(async (tx) => {
+      const vendors = await tx.user.findMany({
+        where: {
+          id: { in: data.vendors },
+          role: UserRole.VENDOR,
+          isActive: true,
+        },
+        select: { id: true, email: true, name: true, companyName: true },
+      });
+
+      if (!vendors.length) throw new Error("No valid vendors found");
+      if (vendors.length !== data.vendors.length)
+        throw new Error("Some selected users are not vendors");
+
+      const rfqNo = await generateRFQNumber(tx);
+
+      const { subject, body } = generateRFQEmail({
         rfqNo,
-        emailSubject,
+        dueDate: data.dueDate,
         terms: data.terms,
-        emailMessage,
-        followUpEmail: data.followUpEmail,
-        rfqStatus: data.rfqStatus || rfqStatus.SENT,
-        vendors: {
-          connect: data.vendors.map((id) => ({ id })),
-        },
-        items: {
-          connect: data.items.map((id) => ({ id })),
-        },
-      },
-    });
-    console.log("RFQ created with ID:", rfq);
-    await Promise.all(
-      vendors.map((vendor) =>
-        addRFQMailJob(
-          vendor.email,
-          vendor.companyName || vendor.name || "Valued Vendor",
-          project?.referenceNo || "N/A",
+        projectName: project.name,
+      });
+
+      const emailSubject = data.emailSubject || subject;
+      const emailMessage = data.emailMessage || body;
+
+      const rfq = await tx.rFQ.create({
+        data: {
+          projectId: data.projectId,
+          dueDate: data.dueDate,
           rfqNo,
           emailSubject,
+          terms: data.terms,
           emailMessage,
-          data.terms as string,
-          data.items,
-        ),
-      ),
-    );
-    return rfq;
-  });
-  return result;
+          followUpEmail: data.followUpEmail,
+          rfqStatus: data.rfqStatus || rfqStatus.SENT,
+          vendors: { connect: data.vendors.map((id) => ({ id })) },
+          items: { connect: data.items.map((id) => ({ id })) },
+        },
+      });
+
+      return { rfq, vendors, rfqNo, emailSubject, emailMessage };
+    });
+
+  // 2️⃣ Send emails to all vendors using handleRFQEmail (concurrently)
+  await Promise.all(
+    vendors.map(async (vendor) => {
+      try {
+        await handleRFQEmail({
+          email: vendor.email,
+          companyName: vendor.companyName || vendor.name || "Valued Vendor",
+          referenceNo: project.referenceNo,
+          rfqNo,
+          emailSubject,
+          emailBody: emailMessage,
+          itemIds: data.items,
+        });
+        console.log(`✉️ Email sent to ${vendor.email}`);
+      } catch (err) {
+        console.error(`❌ Failed to send email to ${vendor.email}:`, err);
+      }
+    }),
+  );
+
+  return rfq;
 };
 export const previewRFQEmail = async (
   projectId: string,
@@ -127,28 +129,36 @@ export const previewRFQEmail = async (
   };
 };
 const getRFQBYProjectId = async (projectId: string) => {
+  // Get project with commodity name
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true, commoditiId: true },
-  });
-  if (!project) throw new Error("Project not found");
-  if (!project.commoditiId) throw new Error("Project commodity ID not found");
-
-  const items = await prisma.items.findMany({
-    where: { commodityId: project.commoditiId },
-    select: { id: true, itemTitle: true },
-  });
-
-  const vendors = await prisma.user.findMany({
-    where: {
-      commoditiId: project.commoditiId,
+    select: {
+      id: true,
+      name: true,
+      commodity: { select: { name: true } }, // get commodity name from ID
     },
+  });
+
+  if (!project) throw new Error("Project not found");
+  if (!project.commodity)
+    throw new Error("Commodity not found for this project");
+
+  const commodityName = project.commodity.name;
+
+  // Get items by matching commodity name
+  const items = await prisma.items.findMany({
+    where: { commodity: commodityName }, // match by name
+    select: { id: true, item_name: true, qty: true },
+  });
+
+  // Get vendors linked to this commodity (still by ID)
+  const vendors = await prisma.user.findMany({
+    where: { commoditiId: project.commodity.name },
     select: { id: true, name: true, companyName: true },
   });
 
-  return { items, vendors };
+  return { commodityName, items, vendors };
 };
-
 export const sendFollowUpToVendor = async (rfqId: string, vendorId: string) => {
   const rfq = await prisma.rFQ.findUnique({
     where: { id: rfqId },

@@ -59,7 +59,6 @@ const getCommodityById = async (id: string, user: JwtPayload) => {
   const commodity = await prisma.commodity.findUnique({
     where: { id },
     include: {
-      items: { select: { id: true, itemTitle: true } },
       vendors: { select: { id: true, name: true, companyName: true } },
     },
   });
@@ -99,24 +98,24 @@ const getVendorsByCommonditiId = async (id: string, user: JwtPayload) => {
   return { data: vendors, meta };
 };
 
-const getItemsByCommonditiId = (id: string, user: JwtPayload) => {
-  if (!user || !user.id) {
-    throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-  }
-  if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
-    throw new AppError(
-      HttpStatus.UNAUTHORIZED,
-      "You are not authorized to view items",
-    );
-  }
+// const getItemsByCommonditiId = (id: string, user: JwtPayload) => {
+//   if (!user || !user.id) {
+//     throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+//   }
+//   if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
+//     throw new AppError(
+//       HttpStatus.UNAUTHORIZED,
+//       "You are not authorized to view items",
+//     );
+//   }
 
-  const items = prisma.items.findMany({
-    where: {
-      commodityId: id,
-    },
-  });
-  return items;
-};
+//   const items = prisma.items.findMany({
+//     where: {
+//       commodityId: id,
+//     },
+//   });
+//   return items;
+// };
 const updateCommodity = async (
   id: string,
   data: ICommondityUpdate,
@@ -158,7 +157,7 @@ export const CommodityService = {
   getAllCommodities,
   getCommodityById,
   getVendorsByCommonditiId,
-  getItemsByCommonditiId,
+  // getItemsByCommonditiId,
   updateCommodity,
   deleteCommodity,
 };

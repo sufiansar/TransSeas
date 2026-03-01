@@ -33,22 +33,29 @@ export const generateRFQPdf = async (
   /* ✅ more breathing room after logo */
   doc.moveDown(4);
 
-  /* ===== TABLE CONFIG (A4 SAFE) ===== */
-
+  /* ===== TABLE CONFIG (A4 FULL WIDTH) ===== */
   const startX = 30;
-  const colWidths = [80, 65, 80, 35, 35, 55, 135, 50]; // total ≈ 535
+  // Total available width: 535
+  const colWidths = [
+    70, // item_name
+    60, // Item Code
+    65, // Manufacturer
+    65, // Commodity
+    35, // Qty
+    40, // Unit
+    200, // Description (wider now)
+    0, // placeholder if needed
+  ];
+
   const headers = [
-    "Item Title",
+    "Item Name",
     "Item Code",
     "Manufacturer",
+    "Commodity",
     "Qty",
     "Unit",
     "Description",
-    // "Price",
-    // "Specifications",
-    // "Status",
   ];
-
   const drawRow = (y: number, row: string[], bold = false) => {
     let x = startX;
 
@@ -87,16 +94,13 @@ export const generateRFQPdf = async (
     }
 
     y += drawRow(y, [
-      item.itemTitle,
-      item.itemcode,
+      item.item_name,
+      item.item_code,
       item.manufacturer,
-      String(item.quantity),
+      item.commodity,
+      String(item.qty),
       item.unit,
       item.description || "N/A",
-
-      // String(item.price ?? "N/A"),
-      // item.specifications,
-      // item.status,
     ]);
   }
 

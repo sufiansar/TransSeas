@@ -17,11 +17,50 @@ const transporter = nodeMailer.createTransport({
   host: dbConfig.smtp.smtp_host,
 } as SMTPTransport.Options);
 
+// interface SendEmailOptions {
+//   to: string;
+//   subject: string;
+//   templateName: string;
+//   templateData?: Record<string, any>;
+//   attachments?: {
+//     filename: string;
+//     content: Buffer | string;
+//     contentType: string;
+//   }[];
+// }
+
+// export const sendEmail = async ({
+//   to,
+//   subject,
+//   templateName,
+//   templateData,
+//   attachments,
+// }: SendEmailOptions) => {
+//   try {
+//     const templatePath = path.join(__dirname, `templates/${templateName}.ejs`);
+//     const html = await ejs.renderFile(templatePath, templateData);
+//     const info = await transporter.sendMail({
+//       from: dbConfig.smtp.smtp_from,
+//       to: to,
+//       subject: subject,
+//       html: html,
+//       attachments: attachments?.map((attachment) => ({
+//         filename: attachment.filename,
+//         content: attachment.content,
+//         contentType: attachment.contentType,
+//       })),
+//     });
+//     console.log(`\u2709\uFE0F Email sent to ${to}: ${info.messageId}`);
+//   } catch (error: any) {
+//     console.log("email sending error", error.message);
+//     throw new AppError(401, "Email error", error);
+//   }
+// };
+
 interface SendEmailOptions {
   to: string;
   subject: string;
-  templateName: string;
-  templateData?: Record<string, any>;
+  html: string; // direct HTML content only
   attachments?: {
     filename: string;
     content: Buffer | string;
@@ -32,27 +71,29 @@ interface SendEmailOptions {
 export const sendEmail = async ({
   to,
   subject,
-  templateName,
-  templateData,
+  html,
   attachments,
 }: SendEmailOptions) => {
   try {
-    const templatePath = path.join(__dirname, `templates/${templateName}.ejs`);
-    const html = await ejs.renderFile(templatePath, templateData);
+    if (!html) {
+      throw new AppError(400, "No HTML content provided for email");
+    }
+
     const info = await transporter.sendMail({
       from: dbConfig.smtp.smtp_from,
-      to: to,
-      subject: subject,
-      html: html,
+      to,
+      subject,
+      html,
       attachments: attachments?.map((attachment) => ({
         filename: attachment.filename,
         content: attachment.content,
         contentType: attachment.contentType,
       })),
     });
-    console.log(`\u2709\uFE0F Email sent to ${to}: ${info.messageId}`);
+
+    console.log(`✉️ Email sent to ${to}: ${info.messageId}`);
   } catch (error: any) {
-    console.log("email sending error", error.message);
+    console.log("Email sending error:", error.message);
     throw new AppError(401, "Email error", error);
   }
 };

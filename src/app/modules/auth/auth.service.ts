@@ -12,6 +12,10 @@ import { prisma } from "../../config/prisma";
 import { UserRole } from "@prisma/client";
 import crypto from "crypto";
 import HttpStatus from "http-status";
+import {
+  handleForgotPassword,
+  handleInviteUserEmail,
+} from "../../bullMQ/workers/mailWorkers";
 
 interface LoginPayload {
   email: string;
@@ -122,12 +126,11 @@ const forgotPassword = async (email: string) => {
 
   const resetUILink = `${dbConfig.frontEnd_url}/reset-password?id=${isUserExit.id}&token=${resetLink}`;
 
-  const result = await addForgotPasswordJob(
-    isUserExit.email,
-    isUserExit.name as string,
-
+  const result = await handleForgotPassword({
+    email: isUserExit.email,
+    name: isUserExit.name as string,
     resetUILink,
-  );
+  });
   console.log("Forgot password job added to queue:", result);
   return result;
 };
@@ -176,11 +179,11 @@ const createInvite = async (email: string, role: UserRole, user: any) => {
     },
   });
 
-  await addInviteUserJob(
+  await handleInviteUserEmail({
     email,
-    `${dbConfig.frontEnd_url}/invite?token=${token}`,
+    inviteLink: `${dbConfig.frontEnd_url}/invite?token=${token}`,
     role,
-  );
+  });
 
   return {
     invite,

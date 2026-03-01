@@ -19,6 +19,7 @@ export interface Item {
   remarks?: string;
   status?: ItemStatus;
   rfqId?: string;
+  batch_id?: string;
   rfq?: any;
   project_id: string;
   project?: any;

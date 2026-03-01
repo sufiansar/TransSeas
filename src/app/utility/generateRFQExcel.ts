@@ -1,41 +1,5 @@
-// import ExcelJS from "exceljs";
-// import path from "path";
-// import fs from "fs/promises";
-
-// export const generateRFQExcel = async (
-//   items: any[],
-//   rfqNo: string,
-//   referenceNo: string,
-// ) => {
-//   const tmpDir = path.join(process.cwd(), "tmp");
-
-//   await fs.mkdir(tmpDir, { recursive: true });
-
-//   const filePath = path.join(tmpDir, `${rfqNo}.xlsx`);
-
-//   const workbook = new ExcelJS.Workbook();
-//   const sheet = workbook.addWorksheet("RFQ Items");
-
-//   sheet.columns = [
-//     { header: "Item Title", key: "itemTitle", width: 30 },
-//     { header: "Item Code", key: "itemcode", width: 18 },
-//     { header: "Manufacturer", key: "menufacturer", width: 22 },
-//     { header: "Quantity", key: "quantity", width: 12 },
-//     { header: "Unit", key: "unit", width: 10 },
-//     { header: "Price", key: "price", width: 14 },
-//     { header: "Specifications", key: "specifications", width: 35 },
-//     { header: "Status", key: "status", width: 14 },
-//   ];
-
-//   items.forEach((item) => sheet.addRow(item));
-
-//   await workbook.xlsx.writeFile(filePath);
-
-//   return filePath;
-// };
 import ExcelJS from "exceljs";
-import fs from "fs";
-import fsPromises from "fs/promises";
+import fs from "fs/promises";
 import path from "path";
 
 export const generateRFQExcel = async (
@@ -44,54 +8,43 @@ export const generateRFQExcel = async (
   referenceNo: string,
 ) => {
   const tmpDir = path.join(process.cwd(), "tmp");
-  await fsPromises.mkdir(tmpDir, { recursive: true });
+  await fs.mkdir(tmpDir, { recursive: true });
 
   const filePath = path.join(tmpDir, `${rfqNo}.xlsx`);
-
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("RFQ");
 
-  // ===== LOGO =====
-  const logoPath = path.join(process.cwd(), "src/assets/logo.png");
-  if (fs.existsSync(logoPath)) {
-    const imageId = workbook.addImage({
-      filename: logoPath,
-      extension: "png",
-    });
-    // Add image at top-left (columns 1-3, rows 1-4)
-    sheet.addImage(imageId, "A1:D5");
-  }
+  // ===== TITLE =====
+  sheet.mergeCells("A1:G1");
+  sheet.getCell("A1").value = "REQUEST FOR QUOTATION";
+  sheet.getCell("A1").font = { size: 20, bold: true };
+  sheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
 
-  // ===== RFQ INFO =====
-  sheet.mergeCells("D1", "H2");
-  sheet.getCell("D1").value = "REQUEST FOR QUOTATION";
-  sheet.getCell("D1").font = { size: 18, bold: true };
-  sheet.getCell("D1").alignment = { vertical: "middle", horizontal: "center" };
+  sheet.mergeCells("A2:G2");
+  sheet.getCell("A2").value = `RFQ No: ${rfqNo}`;
+  sheet.getCell("A2").alignment = { horizontal: "center" };
 
-  sheet.mergeCells("D3", "H3");
-  sheet.getCell("D3").value = `RFQ No: ${rfqNo}`;
-  sheet.getCell("D3").alignment = { horizontal: "center" };
+  sheet.mergeCells("A3:G3");
+  sheet.getCell("A3").value = `Project REF No: ${referenceNo}`;
+  sheet.getCell("A3").alignment = { horizontal: "center" };
 
-  sheet.mergeCells("D4", "H4");
-  sheet.getCell("D4").value = `Project REF No: ${referenceNo}`;
-  sheet.getCell("D4").alignment = { horizontal: "center" };
+  sheet.addRow([]);
 
   // ===== HEADERS =====
   const headers = [
-    "Item Title",
+    "Item Name",
     "Item Code",
     "Manufacturer",
+    "Commodity",
     "Qty",
     "Unit",
-    // "Price",
-    // "Specifications",
-    // "Status",
+    "Description",
   ];
-
-  sheet.addRow([]);
   const headerRow = sheet.addRow(headers);
-  headerRow.font = { bold: true };
-  headerRow.alignment = { horizontal: "center" };
+  headerRow.font = { bold: true, size: 12 };
+  headerRow.alignment = { horizontal: "center", vertical: "middle" };
+  headerRow.height = 25;
+
   headerRow.eachCell((cell) => {
     cell.border = {
       top: { style: "thin" },
@@ -101,19 +54,27 @@ export const generateRFQExcel = async (
     };
   });
 
+  // ===== COLUMN WIDTHS (wider description) =====
+  const colWidths = [30, 20, 25, 25, 12, 12, 80]; // Description column very wide
+  colWidths.forEach((w, i) => {
+    sheet.getColumn(i + 1).width = w;
+  });
+
   // ===== DATA =====
   items.forEach((item) => {
     const row = sheet.addRow([
-      item.itemTitle,
-      item.itemcode,
+      item.item_name,
+      item.item_code,
       item.manufacturer,
-      item.quantity,
+      item.commodity,
+      item.qty,
       item.unit,
-      // item.price ?? "N/A",
-      // item.specifications,
-      // item.status,
+      item.description || "N/A",
     ]);
+
     row.eachCell((cell) => {
+      cell.alignment = { vertical: "top", wrapText: true };
+      cell.font = { size: 11 };
       cell.border = {
         top: { style: "thin" },
         left: { style: "thin" },
@@ -121,22 +82,21 @@ export const generateRFQExcel = async (
         right: { style: "thin" },
       };
     });
-  });
 
-  // ===== COLUMN WIDTHS =====
-  const colWidths = [30, 20, 25, 10, 10, 25]; // adjust as needed
-  colWidths.forEach((w, i) => {
-    sheet.getColumn(i + 1).width = w;
+    // Auto-fit row height based on description text
+    const desc = item.description || "";
+    const approxLineCount = Math.ceil(desc.length / 50); // 50 chars per line approx
+    row.height = approxLineCount * 18; // 18 pts per line
   });
 
   // ===== FOOTER =====
-  const lastRow = sheet.addRow([]);
+  sheet.addRow([]);
   const footerRow = sheet.addRow(["System generated RFQ document."]);
-  sheet.mergeCells(`A${footerRow.number}:F${footerRow.number}`);
+  sheet.mergeCells(`A${footerRow.number}:G${footerRow.number}`);
   footerRow.getCell(1).alignment = { horizontal: "center" };
-  footerRow.font = { italic: true, size: 10 };
+  footerRow.font = { italic: true, size: 11 };
 
-  // ===== SAVE FILE =====
+  // ===== SAVE =====
   await workbook.xlsx.writeFile(filePath);
 
   return filePath;

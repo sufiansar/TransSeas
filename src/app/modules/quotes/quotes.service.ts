@@ -85,7 +85,7 @@ const getAllQuotations = async (
       include: {
         project: {
           include: {
-            items: { select: { id: true, itemTitle: true, quantity: true } },
+            items: { select: { id: true, item_name: true, qty: true } },
             vendor: { select: { id: true, name: true, companyName: true } },
           },
         },
@@ -137,7 +137,7 @@ const quotationStatusUpdate = async (
 const compareQuotations = async (projectId: string) => {
   //Get all project items
   const projectItems = await prisma.items.findMany({
-    where: { projectId },
+    where: { project_id: projectId },
   });
 
   // Get all approved quotations
@@ -183,8 +183,8 @@ const compareQuotations = async (projectId: string) => {
 
     return {
       itemId: item.id,
-      itemTitle: item.itemTitle,
-      quantity: item.quantity,
+      itemTitle: item.item_name,
+      quantity: item.qty,
       vendors: vendorPrices,
     };
   });
@@ -207,7 +207,7 @@ const getQuotationById = async (quotationId: string, user: JwtPayload) => {
     include: {
       project: {
         include: {
-          items: { select: { id: true, itemTitle: true, quantity: true } },
+          items: { select: { id: true, item_name: true, qty: true } },
           vendor: { select: { id: true, name: true, companyName: true } },
         },
       },
@@ -215,8 +215,8 @@ const getQuotationById = async (quotationId: string, user: JwtPayload) => {
         include: {
           item: {
             select: {
-              itemTitle: true,
-              quantity: true,
+              item_name: true,
+              qty: true,
             },
           },
         },
