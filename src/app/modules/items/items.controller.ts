@@ -91,21 +91,6 @@ const getItemById = catchAsync(
   },
 );
 
-const updateItem = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const payload = req.body;
-    const user = req.user;
-    const item = await ItemsService.updateItems(id as string, payload, user);
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "Item updated successfully",
-      data: item,
-    });
-  },
-);
-
 const deleteItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
@@ -134,48 +119,6 @@ const getItemStatsSummary = catchAsync(
   },
 );
 
-const updateItemStatus = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { itemId } = req.params;
-    const payload = req.body;
-    const user = req.user;
-
-    const result = await ItemsService.updateItemStatus(
-      itemId as string,
-      payload,
-      user,
-    );
-
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "Item status updated successfully",
-      data: result,
-    });
-  },
-);
-
-const bulkUpdateItemStatus = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { batch_id: batchId } = req.query;
-    const payload = req.body;
-    const user = req.user;
-
-    const result = await ItemsService.bulkUpdateItemStatus(
-      batchId as string,
-      payload,
-      user,
-    );
-
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "Bulk item status updated successfully",
-      data: result,
-    });
-  },
-);
-
 const getNeedsReviewItems = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
@@ -190,15 +133,29 @@ const getNeedsReviewItems = catchAsync(
   },
 );
 
+const itemUpdates = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const user = req.user;
+    const payload = req.body;
+    const result = await ItemsService.itemUpdates(id as string, payload, user);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Item updates retrieved successfully",
+      data: result,
+    });
+  },
+);
+
 export const ItemsController = {
   uploadPdfAndExcelFiles,
   getUploadBatchItems,
   getAllItems,
   getItemById,
-  updateItem,
   deleteItem,
   getItemStatsSummary,
-  updateItemStatus,
-  bulkUpdateItemStatus,
   getNeedsReviewItems,
+  itemUpdates,
 };

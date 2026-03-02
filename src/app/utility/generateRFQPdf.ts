@@ -30,7 +30,7 @@ export const generateRFQPdf = async (
     .text(`RFQ No: ${rfqNo}`, { align: "center" })
     .text(`Project REF No: ${referenceNo}`, { align: "center" });
 
-  /* ✅ more breathing room after logo */
+  /*more breathing room after logo */
   doc.moveDown(4);
 
   /* ===== TABLE CONFIG (A4 FULL WIDTH) ===== */
@@ -40,8 +40,8 @@ export const generateRFQPdf = async (
     70, // item_name
     60, // Item Code
     65, // Manufacturer
-    65, // Commodity
-    35, // Qty
+    70, // Commodity
+    30, // Qty
     40, // Unit
     200, // Description (wider now)
     0, // placeholder if needed

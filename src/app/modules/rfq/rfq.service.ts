@@ -5,7 +5,11 @@ import { generateRFQEmail, generateRFQNumber } from "../../lib/generateEmail";
 import { PrismaQueryBuilder } from "../../utility/queryBuilder";
 import { RfqFilterableFields, RfqSearchableFields } from "./rfq.constant";
 import { IRFQ } from "./rfq.interface";
-import { handleRFQEmail } from "../../bullMQ/workers/mailWorkers";
+import {
+  handleFollowUpEmail,
+  handleRFQEmail,
+} from "../../bullMQ/workers/mailWorkers";
+import { getFollowUpEmail } from "../../utility/templates/followUpEmail";
 
 const createRFQDto = async (data: IRFQ) => {
   if (!data.projectId) throw new Error("Project ID is required");
@@ -160,7 +164,8 @@ const getRFQBYProjectId = async (projectId: string) => {
 
   return { commodityName, items, vendors };
 };
-export const sendFollowUpToVendor = async (rfqId: string, vendorId: string) => {
+const sendManualFollowUpToVendor = async (rfqId: string, vendorId: string) => {
+  // 1️⃣ Fetch the RFQ with vendors and project
   const rfq = await prisma.rFQ.findUnique({
     where: { id: rfqId },
     include: {
@@ -173,27 +178,25 @@ export const sendFollowUpToVendor = async (rfqId: string, vendorId: string) => {
   });
 
   if (!rfq) throw new Error("RFQ not found");
-  if (!rfq.followUpEmail) throw new Error("Follow-up email not found");
 
+  // 2️⃣ Check if the vendor exists in this RFQ
   const vendor = rfq.vendors.find((v) => v.id === vendorId);
   if (!vendor) throw new Error("Vendor not found in this RFQ");
 
-  const followUpSubject = `${rfq.emailSubject} - Follow Up`;
+  const companyName = vendor.companyName || vendor.name || "Valued Vendor";
+  const projectRef = rfq.project?.referenceNo || "N/A";
+  const rfqNo = rfq.rfqNo;
 
-  await addRFQMailJob(
-    vendor.email,
-    vendor.companyName || vendor.name || "Valued Vendor",
-    rfq.project?.referenceNo || "N/A",
-    rfq.rfqNo,
-    followUpSubject,
-    rfq.followUpEmail,
-    rfq.terms as string,
-    rfq.items.map((item) => item.id),
-  );
+  // 3️⃣ Use handleFollowUpEmail to send email directly
+  await handleFollowUpEmail({
+    email: vendor.email,
+    vendorName: companyName,
+    projectRef: projectRef,
+    rfqNo: rfqNo,
+  });
 
   return { message: `Follow-up email sent to ${vendor.name}` };
 };
-
 const getAllRFQs = async (query: any) => {
   const prismaQuery = new PrismaQueryBuilder(query);
   const builtQuery = prismaQuery
@@ -335,6 +338,7 @@ const deleteRFQ = async (rfqId: string) => {
 
 export const RFQService = {
   createRFQDto,
+  sendManualFollowUpToVendor,
   previewRFQEmail,
   getAllRFQs,
   getRFQById,

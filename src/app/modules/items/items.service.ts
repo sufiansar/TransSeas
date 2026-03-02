@@ -468,66 +468,6 @@ export const getItemById = async (id: string) => {
   }
 };
 
-const updateItems = async (id: string, payload: any, user: JwtPayload) => {
-  if (!user) {
-    throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-  }
-  if (user.role !== UserRole.SUPER_ADMIN && user.role !== UserRole.ADMIN) {
-    throw new AppError(
-      HttpStatus.FORBIDDEN,
-      "Only ADMIN and SUPER_ADMIN can update items",
-    );
-  }
-
-  const existingItem = await prisma.items.findUnique({ where: { id } });
-
-  if (existingItem) {
-    const updatedItem = await prisma.items.update({
-      where: { id },
-      data: payload,
-    });
-
-    return updatedItem;
-  }
-
-  const itemUrl = `${normalizeBaseUrl(PROCUREMENT_ITEMS_API_URL)}${encodeURIComponent(id)}`;
-
-  try {
-    const response = await axios.patch(itemUrl, payload, {
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
-    }
-
-    if (axios.isAxiosError(error)) {
-      const externalMessage =
-        (error.response?.data as { detail?: string; message?: string })
-          ?.detail ||
-        (error.response?.data as { detail?: string; message?: string })
-          ?.message ||
-        error.response?.statusText ||
-        error.message;
-
-      throw new AppError(
-        HttpStatus.BAD_GATEWAY,
-        `Procurement item update failed: ${externalMessage}`,
-      );
-    }
-
-    throw new AppError(
-      HttpStatus.BAD_GATEWAY,
-      "Procurement item update failed",
-    );
-  }
-};
-
 const deleteItems = async (id: string, user: JwtPayload) => {
   if (!user) {
     throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -548,42 +488,6 @@ const deleteItems = async (id: string, user: JwtPayload) => {
     });
 
     return existingItem;
-  }
-
-  const itemUrl = `${normalizeBaseUrl(PROCUREMENT_ITEMS_API_URL)}${encodeURIComponent(id)}`;
-
-  try {
-    const response = await axios.delete(itemUrl, {
-      headers: {
-        accept: "application/json",
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
-    }
-
-    if (axios.isAxiosError(error)) {
-      const externalMessage =
-        (error.response?.data as { detail?: string; message?: string })
-          ?.detail ||
-        (error.response?.data as { detail?: string; message?: string })
-          ?.message ||
-        error.response?.statusText ||
-        error.message;
-
-      throw new AppError(
-        HttpStatus.BAD_GATEWAY,
-        `Procurement item delete failed: ${externalMessage}`,
-      );
-    }
-
-    throw new AppError(
-      HttpStatus.BAD_GATEWAY,
-      "Procurement item delete failed",
-    );
   }
 };
 
@@ -629,113 +533,6 @@ const getItemStatsSummary = async (user: JwtPayload) => {
   }
 };
 
-const updateItemStatus = async (
-  id: string,
-  payload: Record<string, any>,
-  user: JwtPayload,
-) => {
-  if (!user) {
-    throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-  }
-
-  if (user.role !== UserRole.SUPER_ADMIN && user.role !== UserRole.ADMIN) {
-    throw new AppError(
-      HttpStatus.FORBIDDEN,
-      "Only ADMIN and SUPER_ADMIN can update item status",
-    );
-  }
-
-  const statusUrl = `${normalizeBaseUrl(PROCUREMENT_ADMIN_API_URL)}status/${encodeURIComponent(id)}`;
-
-  try {
-    const response = await axios.patch(statusUrl, payload, {
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
-    }
-
-    if (axios.isAxiosError(error)) {
-      console.log("FULL EXTERNAL ERROR:", error.response?.data);
-
-      const externalMessage =
-        typeof error.response?.data === "object"
-          ? JSON.stringify(error.response.data, null, 2)
-          : error.response?.data || error.message;
-
-      throw new AppError(
-        HttpStatus.BAD_GATEWAY,
-        `Item status update failed: ${externalMessage}`,
-      );
-    }
-
-    throw new AppError(HttpStatus.BAD_GATEWAY, "Item status update failed");
-  }
-};
-
-const bulkUpdateItemStatus = async (
-  batchId: string,
-  payload: Record<string, any>,
-  user: JwtPayload,
-) => {
-  if (!user) {
-    throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-  }
-
-  if (user.role !== UserRole.SUPER_ADMIN && user.role !== UserRole.ADMIN) {
-    throw new AppError(
-      HttpStatus.FORBIDDEN,
-      "Only ADMIN and SUPER_ADMIN can bulk update item status",
-    );
-  }
-
-  if (!batchId) {
-    throw new AppError(HttpStatus.BAD_REQUEST, "batch_id is required");
-  }
-
-  const bulkStatusUrl = `${normalizeBaseUrl(PROCUREMENT_ADMIN_API_URL)}bulk-status`;
-
-  try {
-    const response = await axios.patch(bulkStatusUrl, payload, {
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-      },
-      params: {
-        batch_id: batchId,
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const externalMessage =
-        (error.response?.data as { detail?: string; message?: string })
-          ?.detail ||
-        (error.response?.data as { detail?: string; message?: string })
-          ?.message ||
-        error.response?.statusText ||
-        error.message;
-
-      throw new AppError(
-        HttpStatus.BAD_GATEWAY,
-        `Bulk item status update failed: ${externalMessage}`,
-      );
-    }
-
-    throw new AppError(
-      HttpStatus.BAD_GATEWAY,
-      "Bulk item status update failed",
-    );
-  }
-};
-
 const getNeedsReviewItems = async (user: JwtPayload) => {
   if (!user) {
     throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -777,15 +574,38 @@ const getNeedsReviewItems = async (user: JwtPayload) => {
     throw new AppError(HttpStatus.BAD_GATEWAY, "Needs review fetch failed");
   }
 };
+
+const itemUpdates = async (id: string, payload: any, user: JwtPayload) => {
+  if (!user) {
+    throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+  if (user.role !== UserRole.SUPER_ADMIN && user.role !== UserRole.ADMIN) {
+    throw new AppError(
+      HttpStatus.FORBIDDEN,
+      "Only ADMIN and SUPER_ADMIN can update items",
+    );
+  }
+
+  const existingItem = await prisma.items.findUnique({ where: { id } });
+
+  if (!existingItem) {
+    throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
+  }
+
+  const updatedItem = await prisma.items.update({
+    where: { id },
+    data: payload,
+  });
+
+  return updatedItem;
+};
 export const ItemsService = {
   uploadPdfAndExcelFiles,
   getUploadBatchItems,
   getAllItems,
   getItemById,
-  updateItems,
   deleteItems,
   getItemStatsSummary,
-  updateItemStatus,
-  bulkUpdateItemStatus,
   getNeedsReviewItems,
+  itemUpdates,
 };
