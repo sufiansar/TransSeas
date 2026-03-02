@@ -77,15 +77,37 @@ const changeUserPassword = async (
   });
 };
 
-const resetPassword = async (
-  payload: Record<string, any>,
-  decodedToken: JwtPayload,
-) => {
-  const { newPassword } = payload;
+const resetPassword = async (payload: Record<string, any>) => {
+  const { token, newPassword } = payload;
+
+  if (!token) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Reset token is required", "");
+  }
+
+  let decodedToken: JwtPayload;
+
+  try {
+    decodedToken = Jwt.verify(
+      token,
+      dbConfig.jwt.accessToken_secret as string,
+    ) as JwtPayload;
+  } catch {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "Invalid or expired reset token",
+      "",
+    );
+  }
+
   const email = decodedToken.email as string;
+
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    throw new Error("User with the provided email does not exist.");
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "User with the provided email does not exist",
+      "",
+    );
   }
 
   const hashedPassword = await bcrypt.hash(
@@ -105,10 +127,6 @@ const forgotPassword = async (email: string) => {
   if (!isUserExit) {
     throw new AppError(httpStatus.BAD_REQUEST, "User does not exist", "");
   }
-
-  // if (!isUserExit.isVerified) {
-  //   throw new AppError(httpStatus.FORBIDDEN, "User Not Verified", "");
-  // }
 
   const jwtPayload = {
     userId: isUserExit.id,

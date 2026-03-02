@@ -42,16 +42,7 @@ router.get(
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   ItemsController.getUploadBatchItems,
 );
-router.patch(
-  "/admin/status/:itemId",
-  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
-  ItemsController.updateItemStatus,
-);
-router.patch(
-  "/admin/bulk-status",
-  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
-  ItemsController.bulkUpdateItemStatus,
-);
+
 router.get(
   "/:id",
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
@@ -59,10 +50,10 @@ router.get(
 );
 
 router.patch(
-  "/:id",
+  "/items-updates/:id",
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   validateRequest(UpdateItemsSchema),
-  ItemsController.updateItem,
+  ItemsController.itemUpdates,
 );
 
 router.delete(

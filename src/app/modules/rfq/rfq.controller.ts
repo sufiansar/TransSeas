@@ -82,6 +82,21 @@ const getRFQBYProjectId = async (req: Request, res: Response) => {
   });
 };
 
+const sendManualFollowUpToVendor = async (req: Request, res: Response) => {
+  const { rfqId } = req.params;
+  const { vendorId } = req.body;
+  const result = await RFQService.sendManualFollowUpToVendor(
+    rfqId as string,
+    vendorId as string,
+  );
+  sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: "Follow-up email sent successfully",
+    data: result,
+  });
+};
+
 const updateRFQ = async (req: Request, res: Response) => {
   const { rfqId } = req.params;
   const payload = req.body;
@@ -113,4 +128,5 @@ export const RFQController = {
   getRFQBYProjectId,
   updateRFQ,
   deleteRFQ,
+  sendManualFollowUpToVendor,
 };

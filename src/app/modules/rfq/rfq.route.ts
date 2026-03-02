@@ -4,18 +4,23 @@ import auth from "../../middlewares/checkAuth";
 import { UserRole } from "@prisma/client";
 import { createRFQSchema } from "./rfq.validation";
 import { RFQController } from "./rfq.controller";
-import { previewRFQEmail } from "./rfq.service";
 
 export const router = Router();
 router.get("/email-preview", RFQController.previewRFQEmail);
 router.get("/", auth(), RFQController.getAllRFQs);
 router.get("/project/:projectId", auth(), RFQController.getRFQBYProjectId);
 router.get("/:rfqId", auth(), RFQController.getRFQById);
+
 router.post(
   "/",
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   validateRequest(createRFQSchema),
   RFQController.createRFQ,
+);
+router.post(
+  "/:rfqId/follow-up",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  RFQController.sendManualFollowUpToVendor,
 );
 router.patch(
   "/:rfqId",

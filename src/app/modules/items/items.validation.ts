@@ -42,8 +42,6 @@ export const CreateItemsSchema = z
     rfqId: z.string().optional().nullable(),
 
     project_id: z.string().min(1, "Project ID is required"),
-
-    commodityId: z.string().min(1, "Commodity ID is required"),
   })
   .strict();
 

@@ -14,6 +14,7 @@ import { rfqEmailTemplate } from "../../utility/templates/rfqEmailTemplate";
 import { inviteEmailTemplate } from "../../utility/templates/inviteEmailTemplate";
 import { resetPasswordEmailTemplate } from "../../utility/templates/resetPasswordEmailTemplate";
 import { otpEmailTemplate } from "../../utility/templates/otpEmailTemplate";
+import { getFollowUpEmail } from "../../utility/templates/followUpEmail";
 
 /* -----------------------------
    Job payload types
@@ -193,19 +194,29 @@ export async function sendOtpEmail({
 //   });
 // }
 
-// export async function handleFollowUpEmail(data: {
-//   email: string;
-//   step: number;
-// }) {
-//   await sendEmail({
-//     to: data.email,
-//     subject: `Reminder ${data.step}`,
-//     templateName: "follow-up",
-//     templateData: {
-//       step: data.step,
-//     },
-//   });
-// }
+export async function handleFollowUpEmail({
+  email,
+  vendorName,
+  projectRef,
+  rfqNo,
+}: {
+  email: string;
+  vendorName: string;
+  projectRef: string;
+  rfqNo: string;
+}) {
+  //  Generate HTML content from your template
+  const htmlContent = getFollowUpEmail(vendorName, projectRef, rfqNo);
+
+  // 2️⃣ Send the email directly
+  await sendEmail({
+    to: email,
+    subject: `Follow-up: RFQ ${rfqNo} – Request for Quotation`,
+    html: htmlContent,
+  });
+
+  return { message: `Follow-up email sent to ${vendorName}` };
+}
 // export async function handleRFQEmail(data: {
 //   email: string;
 //   companyName: string;
